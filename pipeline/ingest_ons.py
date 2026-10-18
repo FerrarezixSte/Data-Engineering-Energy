@@ -26,7 +26,7 @@ MESES = int(os.getenv("ONS_MESES", "3"))
 # Cada conjunto: palavras para achar a pasta no bucket e o mapa coluna canônica -> nomes possíveis no ONS.
 CONJUNTOS = {
     "geracao_usina": {
-        "palavras": ["geracao_usina"], "preferir": "_ho", "evitar": None,
+        "palavras": ["geracao_usina"], "preferir": ["_ho"], "evitar": [],
         "obrigatorias": ["instante", "usina", "tipo_usina", "geracao"],
         "campos": {
             "instante": ["din_instante", "dat_referencia"],
@@ -40,7 +40,7 @@ CONJUNTOS = {
         },
     },
     "fator_capacidade": {
-        "palavras": ["fator_capacidade"], "preferir": "_di", "evitar": None,
+        "palavras": ["fator_capacidade"], "preferir": ["_di"], "evitar": [],
         "obrigatorias": ["instante", "conjunto", "capacidade", "geracao"],
         "campos": {
             "instante": ["din_instante", "dat_referencia"],
@@ -57,7 +57,9 @@ CONJUNTOS = {
         },
     },
     "restricao_eolica": {
-        "palavras": ["restricao_coff_eolica"], "preferir": "usi", "evitar": "detail",
+        # no ONS há mais de um conjunto de restrição eólica; o certo é o que traz geração e referência por usina.
+        # As pastas são testadas nesta ordem e fica a primeira cujos arquivos têm as colunas obrigatórias.
+        "palavras": ["restricao_coff_eolica"], "preferir": ["eolica_tm", "usi"], "evitar": ["intrasemihora", "detail"],
         "obrigatorias": ["instante", "usina", "geracao", "referencia"],
         "campos": {
             "instante": ["din_instante"],
@@ -92,12 +94,17 @@ def listar(prefixo, delimitador=None):
         token = root.findtext("s3:NextContinuationToken", namespaces=NS)
 
 
-def descobrir_pasta(cfg, pastas):
+def pastas_candidatas(cfg, pastas):
+    """Pastas do bucket que combinam com o conjunto, das preferidas para as menos indicadas."""
     cand = [p for p in pastas if all(w in p.lower() for w in cfg["palavras"])]
-    if cfg["evitar"]:
-        cand = [p for p in cand if cfg["evitar"] not in p.lower()] or cand
-    cand.sort(key=lambda p: (cfg["preferir"] not in p.lower(), p))
-    return cand[0] if cand else None
+    def ordem(p):
+        p = p.lower()
+        if any(w in p for w in cfg["preferir"]):
+            return 0
+        if any(w in p for w in cfg["evitar"]):
+            return 2
+        return 1
+    return sorted(cand, key=lambda p: (ordem(p), p))
 
 
 def meses_alvo():
@@ -156,13 +163,24 @@ def baixar(chave, destino):
     print(f"   baixado: {destino.name} ({destino.stat().st_size / 1e6:.1f} MB)")
 
 
+def relacao(arquivo):
+    if arquivo.suffix.lower() == ".parquet":
+        return f"read_parquet('{arquivo.as_posix()}')"
+    return f"read_csv('{arquivo.as_posix()}', delim=';', header=true, all_varchar=true)"
+
+
+def colunas(arquivo):
+    return {c.lower(): c for c in duckdb.connect().sql(f"select * from {relacao(arquivo)} limit 0").columns}
+
+
+def faltantes(cfg, cols):
+    return [c for c in cfg["obrigatorias"] if not any(n in cols for n in cfg["campos"][c])]
+
+
 def normalizar(conjunto, cfg, arquivo, saida):
     con = duckdb.connect()
-    if arquivo.suffix.lower() == ".parquet":
-        rel = f"read_parquet('{arquivo.as_posix()}')"
-    else:
-        rel = f"read_csv('{arquivo.as_posix()}', delim=';', header=true, all_varchar=true)"
-    cols = {c.lower(): c for c in con.sql(f"select * from {rel} limit 0").columns}
+    rel = relacao(arquivo)
+    cols = colunas(arquivo)
     sel, faltando = [], []
     for canon, nomes in cfg["campos"].items():
         achou = next((cols[n] for n in nomes if n in cols), None)
@@ -190,20 +208,34 @@ def main():
     print(f"Meses alvo: {sorted(alvo)}")
     _, pastas = listar("dataset/", "/")
     for conjunto, cfg in CONJUNTOS.items():
-        pasta = descobrir_pasta(cfg, pastas)
-        print(f"\n[{conjunto}] pasta no ONS: {pasta}")
         saida_dir = BRONZE / conjunto
         for velho in saida_dir.glob("*.parquet"):
             velho.unlink()
-        arquivos = escolher(listar(pasta)[0], alvo) if pasta else []
-        if not arquivos:
-            print(f"   nenhum arquivo no período; Bronze vazia. Pastas parecidas: {[p for p in pastas if cfg['palavras'][0].split('_')[0] in p][:10]}")
+        candidatas = pastas_candidatas(cfg, pastas)
+        print(f"\n[{conjunto}] pastas candidatas no ONS: {candidatas}")
+        usada = None
+        for pasta in candidatas:
+            arquivos = escolher(listar(pasta)[0], alvo)
+            if not arquivos:
+                print(f"   {pasta}: nenhum arquivo no período")
+                continue
+            primeiro = RAW / conjunto / arquivos[0].rsplit("/", 1)[-1]
+            baixar(arquivos[0], primeiro)
+            falta = faltantes(cfg, colunas(primeiro))
+            if falta:
+                print(f"   {pasta}: não serve, faltam {falta}. Colunas: {list(colunas(primeiro))}")
+                continue
+            usada = pasta
+            print(f"   usando {pasta}")
+            for k in arquivos:
+                destino = RAW / conjunto / k.rsplit("/", 1)[-1]
+                baixar(k, destino)
+                normalizar(conjunto, cfg, destino, saida_dir / (destino.stem + ".parquet"))
+            break
+        if usada is None:
+            # não derruba o pipeline: os outros conjuntos seguem e o gráfico correspondente fica ilustrativo
+            print(f"   AVISO: nenhuma pasta de {conjunto} com as colunas necessárias; Bronze vazia.")
             bronze_vazia(cfg, saida_dir / "_vazio.parquet")
-            continue
-        for k in arquivos:
-            destino = RAW / conjunto / k.rsplit("/", 1)[-1]
-            baixar(k, destino)
-            normalizar(conjunto, cfg, destino, saida_dir / (destino.stem + ".parquet"))
 
 
 if __name__ == "__main__":
