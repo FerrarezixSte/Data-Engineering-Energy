@@ -8,6 +8,10 @@ sources:
         description: "Geração por usina em base horária (MWmed)."
         meta:
           external_location: "read_parquet('data_lake/bronze/geracao_usina/*.parquet', union_by_name=true)"
+      - name: fator_capacidade
+        description: "Fator de capacidade de usinas eólicas e solares (geração verificada / capacidade instalada)."
+        meta:
+          external_location: "read_parquet('data_lake/bronze/fator_capacidade/*.parquet', union_by_name=true)"
       - name: restricao_eolica
         description: "Restrição de operação (constrained-off) de usinas eólicas, base semi-horária."
         meta:

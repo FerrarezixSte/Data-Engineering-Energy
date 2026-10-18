@@ -12,3 +12,8 @@ models:
     description: "MW médio por hora do dia, por fonte e estado (inclui BRASIL)."
   - name: gold_restricao_eolica_mensal
     description: "Energia eólica restringida por usina e mês."
+  - name: gold_fator_capacidade_mensal
+    description: "Fator de capacidade médio por usina/conjunto e mês."
+    columns:
+      - name: fator_capacidade_pct
+        tests: [not_null]

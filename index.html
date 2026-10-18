@@ -468,51 +468,39 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
           <button type="button" id="f-energia" data-f="energia" aria-pressed="false">Energia</button>
         </div>
         <div class="projects">
-          <article class="proj featured" data-cat="dados">
-            <span class="cat">Engenharia de dados · Azure</span>
-            <h3>Pipeline medalhão de vendas físicas</h3>
-            <p class="muted">Varejo alimentício com 30 lojas físicas: ingestão de dados brutos do Data Lake, validação com regras técnicas na Silver e KPIs de negócio na Gold, publicados no SQL Server para o Looker. Inclui quarentena de registros inválidos e conferência automática Bronze × Silver × Gold.</p>
+          <article class="proj featured" data-cat="dados energia">
+            <span class="cat">Engenharia de dados · Energia · Open source</span>
+            <h3>Pipeline de dados do setor elétrico: ONS + GitHub Actions + DuckDB + dbt</h3>
+            <p class="muted">Todo dia o GitHub Actions baixa os dados abertos do ONS (geração horária por usina, fator de capacidade e restrição de operação de eólicas), o DuckDB processa e o dbt monta as camadas Silver e Gold com regras de qualidade, quarentena e testes. O resultado é publicado neste site: as curvas reais do topo, o gráfico de restrição e a previsão solar vêm dele.</p>
             <div class="metrics">
-              <div class="metric"><b>375 mil</b><span>transações validadas</span></div>
-              <div class="metric"><b>5</b><span>regras técnicas na Silver</span></div>
-              <div class="metric"><b>6</b><span>tabelas Gold para BI</span></div>
-              <div class="metric"><b>0</b><span>divergências na conferência</span></div>
+              <div class="metric"><b>1×/dia</b><span>atualização automática</span></div>
+              <div class="metric"><b>32</b><span>testes dbt por execução</span></div>
+              <div class="metric"><b>5</b><span>tabelas Gold</span></div>
+              <div class="metric"><b>R$ 0</b><span>custo de infraestrutura</span></div>
             </div>
-            <div class="chips"><span class="chip">PySpark</span><span class="chip">Delta MERGE</span><span class="chip">ADLS Gen2</span><span class="chip">Databricks serverless</span><span class="chip">SQL Server</span><span class="chip">Looker</span></div>
-            <div class="links"><a href="#arquitetura">Arquitetura →</a><a href="https://github.com/FerrarezixSte" target="_blank" rel="noopener">GitHub →</a></div>
+            <div class="chips"><span class="chip">GitHub Actions</span><span class="chip">DuckDB</span><span class="chip">dbt Core</span><span class="chip">Parquet</span><span class="chip">Python</span><span class="chip">ONS dados abertos</span></div>
+            <div class="links"><a href="#arquitetura">Arquitetura →</a><a href="https://github.com/FerrarezixSte/data-engineering-energy" target="_blank" rel="noopener">Código no GitHub →</a></div>
           </article>
           <article class="proj" data-cat="ia energia">
             <span class="cat">IA · Energia</span>
             <h3>Previsão de geração solar para o dia seguinte</h3>
-            <p class="muted">Gradient boosting treinado com a geração horária real de uma usina (ONS) e o tempo da região (Open-Meteo). Roda todo dia no pipeline aberto, mede o erro nos últimos 14 dias contra a persistência e publica a previsão de amanhã neste site.</p>
-            <div class="chips"><span class="chip">Python</span><span class="chip">scikit-learn</span><span class="chip">Open-Meteo</span><span class="chip">séries temporais</span><span class="chip">GitHub Actions</span></div>
+            <p class="muted">Gradient boosting treinado com a geração horária real de uma usina (ONS) e o tempo da região (Open-Meteo). Roda todo dia no pipeline, mede o erro nos últimos 14 dias contra a persistência e publica a previsão de amanhã neste site.</p>
+            <div class="chips"><span class="chip">Python</span><span class="chip">scikit-learn</span><span class="chip">Open-Meteo</span><span class="chip">séries temporais</span></div>
             <div class="links"><a href="#previsao">Ver previsão →</a></div>
           </article>
           <article class="proj" data-cat="dados energia">
-            <span class="cat">Engenharia de dados · Energia</span>
-            <h3>Pipeline ONS: geração renovável e restrições</h3>
-            <p class="muted">Dados abertos do Operador Nacional do Sistema: geração horária por usina, fator de capacidade e restrição de operação de eólicas. Bronze com os arquivos originais, Silver com regras de qualidade e quarentena, Gold com matriz mensal, curva típica por estado e energia eólica perdida por constrained-off.</p>
-            <div class="chips"><span class="chip">ONS dados abertos</span><span class="chip">PySpark</span><span class="chip">Delta MERGE</span><span class="chip">SQL Server</span><span class="chip">Looker</span></div>
+            <span class="cat">Dados · Energia</span>
+            <h3>Restrição de operação de eólicas (constrained-off)</h3>
+            <p class="muted">Quanto cada parque eólico deixou de gerar por ordem do ONS: a Gold compara a geração de referência com a verificada, mês a mês, e o site mostra o parque mais restringido no seu pior dia.</p>
+            <div class="chips"><span class="chip">dbt</span><span class="chip">DuckDB</span><span class="chip">SQL</span><span class="chip">ONS dados abertos</span></div>
             <div class="links"><a href="#restricao">Ver restrições →</a></div>
-          </article>
-          <article class="proj" data-cat="dados energia">
-            <span class="cat">Engenharia de dados · Open source</span>
-            <h3>Pipeline aberto: GitHub Actions + DuckDB + dbt</h3>
-            <p class="muted">A mesma ideia sem nuvem paga: todo dia o GitHub Actions baixa os dados do ONS, o DuckDB processa e o dbt monta Silver e Gold com testes de qualidade. O resultado é publicado neste site, e é dele que vêm as curvas reais do topo da página.</p>
-            <div class="metrics">
-              <div class="metric"><b>1×/dia</b><span>atualização automática</span></div>
-              <div class="metric"><b>22</b><span>testes dbt por execução</span></div>
-              <div class="metric"><b>R$ 0</b><span>custo de infraestrutura</span></div>
-            </div>
-            <div class="chips"><span class="chip">GitHub Actions</span><span class="chip">DuckDB</span><span class="chip">dbt Core</span><span class="chip">Parquet</span><span class="chip">Python</span></div>
-            <div class="links"><a href="https://github.com/FerrarezixSte/FerrarezixSte.github.io" target="_blank" rel="noopener">Código no GitHub →</a></div>
           </article>
           <article class="proj soon" data-cat="ia energia">
             <span class="badge-soon">em construção</span>
             <span class="cat">IA · Energia</span>
             <h3>Anomalias em sensores de ativos</h3>
             <p class="muted">Detecção de leituras fora do padrão (temperatura de transformador, corrente de string) para priorizar manutenção antes da falha.</p>
-            <div class="chips"><span class="chip">Isolation Forest</span><span class="chip">PySpark</span><span class="chip">manutenção preditiva</span></div>
+            <div class="chips"><span class="chip">Isolation Forest</span><span class="chip">Python</span><span class="chip">manutenção preditiva</span></div>
           </article>
         </div>
       </div>
@@ -604,61 +592,51 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <!-- ARQUITETURA -->
   <section class="sec" id="arquitetura">
     <div class="wrap">
-      <div class="sec-head"><span class="tag-bus">B-06 · Arquitetura</span><h2>Do dado bruto ao dashboard.</h2></div>
+      <div class="sec-head"><span class="tag-bus">B-06 · Arquitetura</span><h2>Do dado público ao site, todo dia.</h2></div>
       <div class="sec-body">
-        <p class="muted" style="margin-bottom:20px">Arquitetura de referência do projeto: duas trilhas de processamento (batch e streaming) no mesmo Data Lake, publicação no SQL Server e orquestração versionada.</p>
+        <p class="muted" style="margin-bottom:20px">Arquitetura do repositório <span class="mono">data-engineering-energy</span>: dados abertos do ONS e do Open-Meteo, processamento em DuckDB com dbt, um modelo de machine learning e publicação no GitHub Pages, tudo orquestrado pelo GitHub Actions e sem custo de infraestrutura.</p>
         <div class="diagram">
-          <svg viewBox="0 0 1000 490" role="group" aria-label="Diagrama da arquitetura. Cada bloco é clicável e mostra o que acontece naquela etapa.">
+          <svg viewBox="0 0 1000 470" role="group" aria-label="Diagrama da arquitetura. Cada bloco é clicável e mostra o que acontece naquela etapa.">
             <defs>
               <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-head" d="M0 0L10 5L0 10z"/></marker>
               <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-head-g" d="M0 0L10 5L0 10z"/></marker>
             </defs>
-            <!-- armazenamento (fundo) -->
-            <rect class="d-store" x="350" y="25" width="390" height="330" rx="8"/>
-            <text class="d-l" x="366" y="47">ARMAZENAMENTO · ADLS GEN2</text>
-            <rect class="d-lane" x="362" y="62" width="366" height="123" rx="5"/>
-            <text class="d-s" x="374" y="82">processamento batch</text>
-            <rect class="d-lane" x="362" y="212" width="366" height="123" rx="5"/>
-            <text class="d-s" x="374" y="232">processamento streaming</text>
+            <rect class="d-store" x="190" y="40" width="450" height="150" rx="8"/>
+            <text class="d-l" x="206" y="62">DUCKDB · ons.duckdb · camadas com dbt</text>
             <!-- fluxos -->
-            <path class="d-flow fb" d="M170 135H198" marker-end="url(#ah)"/>
-            <path class="d-flow" d="M170 285H198" marker-end="url(#ah)"/>
-            <path class="d-flow fb" d="M325 135H372" marker-end="url(#ah)"/>
-            <path class="d-flow" d="M325 285H372" marker-end="url(#ah)"/>
-            <path class="d-flow fb" d="M474 135H492" marker-end="url(#ah)"/>
-            <path class="d-flow fb" d="M594 135H612" marker-end="url(#ah)"/>
-            <path class="d-flow" d="M474 285H492" marker-end="url(#ah)"/>
-            <path class="d-flow" d="M594 285H612" marker-end="url(#ah)"/>
-            <path class="d-flow fb" d="M718 135H750V190H768" marker-end="url(#ah)"/>
-            <path class="d-flow" d="M718 285H750V190"/>
-            <path class="d-flow fb" d="M866 190H888" marker-end="url(#ah)"/>
-            <path class="d-dash" d="M300 435H262V322" marker-end="url(#ahg)"/>
-            <path class="d-dash" d="M545 400V357" marker-end="url(#ahg)"/>
-            <path class="d-dash" d="M730 435H818V232" marker-end="url(#ahg)"/>
+            <path class="d-flow fb" d="M160 120H203" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M335 120H353" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M485 120H493" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M625 120H668" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M800 120H820V185H838" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M560 160V240H425V278" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M160 320H353" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M495 320H668" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M800 320H820V235H838" marker-end="url(#ah)"/>
+            <path class="d-dash" d="M300 400V192" marker-end="url(#ahg)"/>
+            <path class="d-dash" d="M425 400V362" marker-end="url(#ahg)"/>
+            <path class="d-dash" d="M735 400V362" marker-end="url(#ahg)"/>
             <!-- blocos clicáveis -->
-            <g class="node" data-k="fonte_b" tabindex="0" role="button" aria-label="Fonte batch"><rect class="d-box" x="20" y="90" width="150" height="90" rx="6"/><text class="d-l" x="34" y="114">FONTE BATCH</text><text class="d-t" x="34" y="140">Azure Data Lake</text><text class="d-s" x="34" y="160">Gen2 · arquivos</text></g>
-            <g class="node" data-k="fonte_s" tabindex="0" role="button" aria-label="Fonte tempo real"><rect class="d-box" x="20" y="240" width="150" height="90" rx="6"/><text class="d-l" x="34" y="264">TEMPO REAL</text><text class="d-t" x="34" y="290">Azure Data Lake</text><text class="d-s" x="34" y="310">Gen2 · eventos</text></g>
-            <g class="node" data-k="ing_b" tabindex="0" role="button" aria-label="Ingestão batch"><rect class="d-box" x="200" y="100" width="125" height="70" rx="6"/><text class="d-t" x="214" y="128">Ingestão batch</text><text class="d-s" x="214" y="150">Databricks</text></g>
-            <g class="node" data-k="ing_s" tabindex="0" role="button" aria-label="Ingestão streaming"><rect class="d-box" x="200" y="250" width="125" height="70" rx="6"/><text class="d-t" x="214" y="278">Ingestão stream</text><text class="d-s" x="214" y="300">Databricks</text></g>
-            <g class="node" data-k="bronze_b" tabindex="0" role="button" aria-label="Bronze batch"><rect class="d-medal d-bronze" x="374" y="100" width="100" height="70" rx="5"/><text class="d-t" x="388" y="128">Bronze</text><text class="d-s" x="388" y="150">dados brutos</text></g>
-            <g class="node" data-k="silver_b" tabindex="0" role="button" aria-label="Silver batch"><rect class="d-medal d-silver" x="494" y="100" width="100" height="70" rx="5"/><text class="d-t" x="508" y="128">Silver</text><text class="d-s" x="508" y="150">validados</text></g>
-            <g class="node" data-k="gold_b" tabindex="0" role="button" aria-label="Gold batch"><rect class="d-medal d-gold" x="614" y="100" width="104" height="70" rx="5"/><text class="d-t" x="628" y="128">Gold</text><text class="d-s" x="628" y="150">KPIs</text></g>
-            <g class="node" data-k="bronze_s" tabindex="0" role="button" aria-label="Bronze streaming"><rect class="d-medal d-bronze" x="374" y="250" width="100" height="70" rx="5"/><text class="d-t" x="388" y="278">Bronze</text><text class="d-s" x="388" y="300">eventos brutos</text></g>
-            <g class="node" data-k="silver_s" tabindex="0" role="button" aria-label="Silver streaming"><rect class="d-medal d-silver" x="494" y="250" width="100" height="70" rx="5"/><text class="d-t" x="508" y="278">Silver</text><text class="d-s" x="508" y="300">eventos tratados</text></g>
-            <g class="node" data-k="gold_s" tabindex="0" role="button" aria-label="Gold tempo real"><rect class="d-medal d-gold" x="614" y="250" width="104" height="70" rx="5"/><text class="d-t" x="628" y="278">Gold</text><text class="d-s" x="628" y="300">tempo real</text></g>
-            <g class="node" data-k="sql" tabindex="0" role="button" aria-label="SQL Server"><rect class="d-box" x="770" y="150" width="96" height="80" rx="6"/><text class="d-t" x="784" y="186">SQL Server</text><text class="d-s" x="784" y="208">tabelas Gold</text></g>
-            <g class="node" data-k="looker" tabindex="0" role="button" aria-label="Looker"><rect class="d-box" x="890" y="130" width="96" height="120" rx="6"/><text class="d-t" x="904" y="166">Looker</text><text class="d-s" x="904" y="190">dashboards</text><text class="d-s" x="904" y="208">e relatórios</text></g>
-            <g class="node" data-k="orch" tabindex="0" role="button" aria-label="Orquestração"><rect class="d-orch" x="300" y="400" width="430" height="70" rx="6"/><text class="d-g" x="316" y="424">CONTROLE DE CÓDIGO E ORQUESTRAÇÃO</text><text class="d-t" x="316" y="452">GitHub  →  Databricks Jobs</text><text class="d-s" x="540" y="452">agendamento</text></g>
+            <g class="node" data-k="ons" tabindex="0" role="button" aria-label="ONS dados abertos"><rect class="d-box" x="20" y="80" width="140" height="80" rx="6"/><text class="d-l" x="34" y="104">FONTE</text><text class="d-t" x="34" y="128">ONS</text><text class="d-s" x="34" y="148">dados abertos</text></g>
+            <g class="node" data-k="bronze" tabindex="0" role="button" aria-label="Bronze"><rect class="d-medal d-bronze" x="205" y="80" width="130" height="80" rx="5"/><text class="d-t" x="219" y="110">Bronze</text><text class="d-s" x="219" y="132">Python</text><text class="d-s" x="219" y="148">Parquet</text></g>
+            <g class="node" data-k="silver" tabindex="0" role="button" aria-label="Silver"><rect class="d-medal d-silver" x="355" y="80" width="130" height="80" rx="5"/><text class="d-t" x="369" y="110">Silver</text><text class="d-s" x="369" y="132">dbt · regras</text></g>
+            <g class="node" data-k="gold" tabindex="0" role="button" aria-label="Gold"><rect class="d-medal d-gold" x="495" y="80" width="130" height="80" rx="5"/><text class="d-t" x="509" y="110">Gold</text><text class="d-s" x="509" y="132">dbt · KPIs</text></g>
+            <g class="node" data-k="json" tabindex="0" role="button" aria-label="ons.json"><rect class="d-box" x="670" y="80" width="130" height="80" rx="6"/><text class="d-t" x="684" y="110">ons.json</text><text class="d-s" x="684" y="132">curvas reais</text></g>
+            <g class="node" data-k="site" tabindex="0" role="button" aria-label="Site no GitHub Pages"><rect class="d-box" x="840" y="150" width="140" height="120" rx="6"/><text class="d-l" x="854" y="174">DESTINO</text><text class="d-t" x="854" y="200">Portfólio</text><text class="d-s" x="854" y="222">GitHub Pages</text></g>
+            <g class="node" data-k="meteo" tabindex="0" role="button" aria-label="Open-Meteo"><rect class="d-box" x="20" y="280" width="140" height="80" rx="6"/><text class="d-l" x="34" y="304">FONTE</text><text class="d-t" x="34" y="328">Open-Meteo</text><text class="d-s" x="34" y="348">clima</text></g>
+            <g class="node" data-k="modelo" tabindex="0" role="button" aria-label="Modelo de previsão"><rect class="d-box" x="355" y="280" width="140" height="80" rx="6"/><text class="d-l" x="369" y="304">IA</text><text class="d-t" x="369" y="328">Previsão solar</text><text class="d-s" x="369" y="348">scikit-learn</text></g>
+            <g class="node" data-k="prevjson" tabindex="0" role="button" aria-label="previsao_solar.json"><rect class="d-box" x="670" y="280" width="130" height="80" rx="6"/><text class="d-t" x="684" y="310">previsao_</text><text class="d-t" x="684" y="328">solar.json</text></g>
+            <g class="node" data-k="orch" tabindex="0" role="button" aria-label="Orquestração"><rect class="d-orch" x="190" y="400" width="610" height="56" rx="6"/><text class="d-g" x="206" y="422">GITHUB ACTIONS · TODO DIA ÀS 06:17</text><text class="d-s" x="206" y="443">ingestão → dbt build (32 testes) → export → previsão → deploy</text></g>
           </svg>
         </div>
         <div class="arch-bar">
-          <button type="button" class="btn primary" id="arch-run">Executar pipeline batch</button>
+          <button type="button" class="btn primary" id="arch-run">Executar pipeline</button>
           <span>ou clique em um bloco do diagrama</span>
         </div>
         <div class="arch-detail" id="arch-detail" aria-live="polite">
           <span class="k" id="arch-k">Etapa</span>
           <h3 id="arch-t">Clique em um bloco</h3>
-          <p class="muted" id="arch-d">Cada bloco mostra o que acontece naquela etapa. O botão simula uma execução do job batch, da fonte ao dashboard, com os números reais do projeto.</p>
+          <p class="muted" id="arch-d">Cada bloco mostra o que acontece naquela etapa. O botão simula uma execução diária do workflow, do download no ONS à publicação no site.</p>
           <ul class="log" id="arch-log"></ul>
         </div>
 
@@ -666,36 +644,37 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
           <div style="--c:#b8733a">
             <h3>Bronze</h3>
             <ul>
-              <li>Cópia fiel da fonte em Delta</li>
-              <li>Colunas de auditoria: arquivo de origem e hora de ingestão</li>
+              <li>Arquivos do ONS dos últimos 3 meses, em Parquet</li>
+              <li>Colunas padronizadas, tudo como texto</li>
+              <li>Arquivo de origem e horário de ingestão</li>
             </ul>
           </div>
           <div style="--c:#9aa7ad">
             <h3>Silver · regras técnicas</h3>
             <ul>
-              <li>R1 id_transacao em UUID, sem nulos nem duplicatas</li>
-              <li>R2 loja existente no cadastro (chave estrangeira)</li>
-              <li>R3 valor da venda maior que zero</li>
-              <li>R4 pagamento em Cartão, Dinheiro ou Pix</li>
-              <li>R5 particionamento por ano e mês</li>
+              <li>R1 instante válido</li>
+              <li>R2 usina identificada (CEG, id ONS ou nome)</li>
+              <li>R3 geração numérica</li>
+              <li>R4 geração não negativa</li>
+              <li>R5 fonte conhecida · sem duplicatas</li>
             </ul>
           </div>
           <div style="--c:#d6a92e">
-            <h3>Gold · regras de negócio</h3>
+            <h3>Gold · indicadores</h3>
             <ul>
-              <li>Receita por loja e mês, com variação MoM</li>
-              <li>Ticket médio por loja e meio de pagamento</li>
-              <li>% de vendas com CPF identificado</li>
-              <li>Caixas sobrecarregados (3× a média do dia)</li>
-              <li>Vendas em feriados nacionais</li>
+              <li>Participação de cada fonte na matriz, por mês</li>
+              <li>Energia diária por usina solar e eólica</li>
+              <li>Curva típica do dia por fonte e estado</li>
+              <li>Fator de capacidade mensal por usina</li>
+              <li>Energia eólica perdida por restrição</li>
             </ul>
           </div>
         </div>
 
         <div class="lessons" aria-label="Decisões técnicas">
-          <div class="lesson"><span class="p">Registro inválido não some</span><p>Em vez de descartar, a Silver grava os rejeitados numa tabela de quarentena com o motivo de cada regra violada. A validação confere Silver + rejeitados = Bronze a cada execução.</p></div>
-          <div class="lesson"><span class="p">Compute serverless tem limites</span><p>Sem configuração global de credenciais, cache ou JDBC genérico, a leitura usa opções por consulta, a listagem de pastas usa o SDK do Azure e a publicação usa o conector nativo do SQL Server.</p></div>
-          <div class="lesson"><span class="p">Upsert idempotente</span><p>As tabelas Gold são atualizadas com MERGE pela chave de cada KPI. Rodar o job duas vezes não duplica linhas.</p></div>
+          <div class="lesson"><span class="p">Custo zero</span><p>GitHub Actions agenda e roda tudo; DuckDB processa os arquivos sem servidor de banco; o site é estático no GitHub Pages.</p></div>
+          <div class="lesson"><span class="p">Teste que falha não publica</span><p>O dbt build roda 32 testes, entre eles Bronze = Silver + quarentena e energia da Gold = Silver. Se algum falhar, os dados do site não são atualizados.</p></div>
+          <div class="lesson"><span class="p">Fonte muda, pipeline não quebra</span><p>A ingestão descobre sozinha a pasta de cada conjunto no ONS e mapeia nomes de coluna alternativos para um esquema padrão.</p></div>
         </div>
       </div>
     </div>
@@ -1310,19 +1289,16 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
   // ---------- arquitetura interativa ----------
   var INFO = {
-    fonte_b: ['Fonte', 'Fonte batch', 'Arquivos CSV de vendas das lojas físicas e o cadastro de lojas, na pasta raw do Azure Data Lake Gen2.'],
-    fonte_s: ['Fonte', 'Fonte em tempo real', 'Eventos de pedidos do e-commerce chegando continuamente ao Data Lake.'],
-    ing_b: ['Ingestão', 'Ingestão batch', 'Notebook no Databricks lê os arquivos brutos e grava em Delta, com colunas de auditoria (arquivo de origem e horário de ingestão).'],
-    ing_s: ['Ingestão', 'Ingestão streaming', 'Spark Structured Streaming com checkpoint, processando os eventos assim que chegam.'],
-    bronze_b: ['Camada Bronze', 'Bronze batch', 'Cópia fiel da fonte em Delta, sem regras de negócio. 375 mil vendas físicas.'],
-    silver_b: ['Camada Silver', 'Silver batch', '5 regras técnicas: id_transacao em UUID e sem duplicatas, loja existente no cadastro, valor maior que zero, pagamento em Cartão/Dinheiro/Pix e partição por ano e mês. Rejeitados vão para a quarentena com o motivo.'],
-    gold_b: ['Camada Gold', 'Gold batch', '6 tabelas de KPIs gravadas com MERGE (upsert): receita por loja com variação MoM, ticket médio, % de CPF identificado, caixas sobrecarregados, vendas em feriados e dimensão de lojas.'],
-    bronze_s: ['Camada Bronze', 'Bronze streaming', 'Eventos brutos gravados em Delta exatamente como chegaram.'],
-    silver_s: ['Camada Silver', 'Silver streaming', 'Checagens em tempo real: completude, tipos de dados, faixas de valor e desvio de volume por hora. Eventos inválidos vão para a quarentena.'],
-    gold_s: ['Camada Gold', 'Gold em tempo real', 'GMV em janelas de 1h, 6h e 24h, top 10 SKUs e alertas de desconto acima de 40% e de queda de volume.'],
-    sql: ['Data warehouse', 'SQL Server', 'Tabelas Gold sincronizadas a cada execução, com o mesmo conteúdo da Delta depois do MERGE. É a fonte do Looker.'],
-    looker: ['Consumo', 'Looker', 'Dashboards de receita, ticket médio, fidelização (CPF) e operação de caixas para as 30 lojas.'],
-    orch: ['Orquestração', 'GitHub e Databricks Jobs', 'Código versionado no GitHub. O Databricks Jobs agenda ingestão, Silver, Gold e publicação em sequência.']
+    ons: ['Fonte', 'ONS · dados abertos', 'Bucket público do Operador Nacional do Sistema (licença CC-BY 4.0): geração horária por usina, fator de capacidade de eólicas e solares e restrição de operação de eólicas. A ingestão descobre a pasta de cada conjunto e baixa os últimos 3 meses.'],
+    bronze: ['Camada Bronze', 'Bronze · Python + Parquet', 'pipeline/ingest_ons.py baixa os arquivos (Parquet antes de CSV), padroniza os nomes de coluna para um esquema único e grava tudo como texto, com o arquivo de origem e o horário de ingestão.'],
+    silver: ['Camada Silver', 'Silver · dbt', 'Converte tipos com try_cast e aplica as regras: instante válido, usina identificada, geração numérica e não negativa, fonte conhecida e sem duplicatas. O que falha vai para a quarentena com o motivo.'],
+    gold: ['Camada Gold', 'Gold · dbt', 'Cinco tabelas: participação das fontes na matriz, energia diária por usina, curva típica do dia por estado, fator de capacidade mensal e energia eólica restringida por mês.'],
+    json: ['Publicação', 'data/ons.json', 'pipeline/export_site.py escolhe a maior usina solar, o maior parque eólico e o parque mais restringido do último mês e grava as curvas que o site desenha.'],
+    meteo: ['Fonte', 'Open-Meteo', 'Irradiância global, direta e difusa, temperatura e nebulosidade dos últimos ~90 dias e a previsão de amanhã, sem chave de API.'],
+    modelo: ['IA', 'Previsão de geração solar', 'pipeline/previsao_solar.py treina um gradient boosting (scikit-learn) com a geração real e o clima, avalia nos últimos 14 dias contra a persistência e prevê amanhã hora a hora.'],
+    prevjson: ['Publicação', 'data/previsao_solar.json', 'Métricas de erro, os últimos 7 dias real × previsto e a previsão de amanhã, lidos pela seção de IA do site.'],
+    site: ['Destino', 'Portfólio no GitHub Pages', 'Site estático: os gráficos leem os dois JSON e, se eles não existirem, mostram dados ilustrativos.'],
+    orch: ['Orquestração', 'GitHub Actions', 'Workflow agendado todo dia às 06:17: ingestão, dbt build com 32 testes, exportação, previsão e deploy. Se um teste falhar, o site não é atualizado.']
   };
   var nodes = document.querySelectorAll('.node');
   var logEl = document.getElementById('arch-log'), runBtn = document.getElementById('arch-run');
@@ -1338,14 +1314,16 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     n.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(n.dataset.k); } });
   });
   var STEPS = [
-    ['orch', 'Databricks Jobs: execução iniciada'],
-    ['fonte_b', 'raw/batch-data: arquivo de vendas encontrado'],
-    ['ing_b', 'Ingestão concluída, colunas de auditoria adicionadas'],
-    ['bronze_b', 'Bronze: 375.000 linhas'],
-    ['silver_b', 'Silver: 375.000 válidas · 0 na quarentena · conferência OK'],
-    ['gold_b', 'Gold: 6 tabelas atualizadas com MERGE'],
-    ['sql', 'SQL Server: 6 tabelas sincronizadas'],
-    ['looker', 'Looker: dashboards prontos com os dados novos']
+    ['orch', 'GitHub Actions: execução agendada iniciada'],
+    ['ons', 'ONS: 3 conjuntos encontrados, últimos 3 meses'],
+    ['bronze', 'Bronze: arquivos padronizados em Parquet'],
+    ['silver', 'Silver: regras aplicadas, rejeitados na quarentena'],
+    ['gold', 'Gold: 5 tabelas · dbt build com 32 testes OK'],
+    ['json', 'data/ons.json gravado'],
+    ['meteo', 'Open-Meteo: clima dos últimos 90 dias e de amanhã'],
+    ['modelo', 'Modelo treinado e avaliado nos últimos 14 dias'],
+    ['prevjson', 'data/previsao_solar.json gravado'],
+    ['site', 'GitHub Pages: site publicado com os dados novos']
   ];
   var busy = false;
   runBtn.addEventListener('click', function () {

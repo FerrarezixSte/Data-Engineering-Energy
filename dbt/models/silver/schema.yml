@@ -23,3 +23,16 @@ models:
         tests: [not_null]
       - name: restringido_mw
         tests: [not_null]
+  - name: silver_fator_capacidade
+    description: "Fator de capacidade horário de usinas/conjuntos eólicos e solares, validado."
+    columns:
+      - name: instante
+        tests: [not_null]
+      - name: chave_conjunto
+        tests: [not_null]
+      - name: fator_capacidade
+        tests: [not_null]
+      - name: tipo_fonte
+        tests:
+          - accepted_values:
+              values: ["SOLAR", "EOLICA"]

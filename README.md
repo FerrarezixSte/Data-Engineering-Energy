@@ -6,13 +6,13 @@ Site do portfólio (`index.html`) e um pipeline de dados aberto que alimenta os 
 
 ```
 ONS (bucket público, CC-BY 4.0)
-   │  pipeline/ingest_ons.py      baixa os últimos 3 meses (Parquet) e padroniza as colunas
+   │  pipeline/ingest_ons.py      baixa os últimos 3 meses de 3 conjuntos (Parquet) e padroniza as colunas
    ▼
 data_lake/bronze/*.parquet        tudo como texto + arquivo de origem e horário de ingestão
    │  dbt build (dbt-duckdb)      tipos, regras de qualidade, quarentena e testes
    ▼
-Silver  silver_geracao_usina · silver_restricao_eolica (+ tabelas *_rejeitados com o motivo)
-Gold    gold_matriz_mensal · gold_geracao_diaria_usina · gold_perfil_horario · gold_restricao_eolica_mensal
+Silver  silver_geracao_usina · silver_fator_capacidade · silver_restricao_eolica (+ tabelas *_rejeitados com o motivo)
+Gold    gold_matriz_mensal · gold_geracao_diaria_usina · gold_perfil_horario · gold_fator_capacidade_mensal · gold_restricao_eolica_mensal
    │  pipeline/export_site.py
    ▼
 data/ons.json  ──►  gráficos do site (curva solar, eólica e restrição de operação)
@@ -38,14 +38,17 @@ Roda **todo dia às 06:17 (Brasília)** pelo GitHub Actions (`.github/workflows/
 | R3 | geração numérica | geração presente e ≥ 0 |
 | R4 | geração ≥ 0 | referência ≥ 0 |
 | R5 | fonte conhecida | |
+
+**Fator de capacidade:** instante válido · conjunto identificado · capacidade > 0 · fator entre 0 e 1,2 (valores em % são convertidos) · fonte solar ou eólica · sem duplicatas.
 | Duplicata | (usina, instante) mantém a ingestão mais recente | idem |
 
 ### Testes dbt
 `not_null` e `accepted_values` nas colunas-chave, mais testes de negócio:
-Silver sem duplicatas · Bronze = Silver + quarentena · energia da Gold = Silver · participação da matriz soma 100%.
+Silver sem duplicatas · Bronze = Silver + quarentena (geração e fator de capacidade) · energia da Gold = Silver · participação da matriz soma 100%. Total: 32 testes por execução.
 
 ## Como publicar
-1. Repositório público `FerrarezixSte.github.io` com estes arquivos na raiz.
+1. Repositório público `data-engineering-energy` com estes arquivos na raiz.
+   Site: https://ferrarezixste.github.io/data-engineering-energy/
 2. **Settings → Pages → Source: GitHub Actions.**
 3. **Settings → Actions → General → Workflow permissions: Read and write.**
 4. **Actions → Pipeline ONS e site → Run workflow** para a primeira carga. Depois roda sozinho todo dia.

@@ -39,6 +39,23 @@ CONJUNTOS = {
             "geracao": ["val_geracao", "val_geracaomwmed"],
         },
     },
+    "fator_capacidade": {
+        "palavras": ["fator_capacidade"], "preferir": "_di", "evitar": None,
+        "obrigatorias": ["instante", "conjunto", "capacidade", "geracao"],
+        "campos": {
+            "instante": ["din_instante", "dat_referencia"],
+            "tipo_usina": ["nom_tipousina", "nom_tipo_usina"],
+            "conjunto": ["nom_usina_conjunto", "nom_usina", "nom_localizacao"],
+            "ceg": ["ceg", "cod_ceg"],
+            "estado": ["id_estado", "nom_estado"],
+            "capacidade": ["val_capacidadeinstalada", "val_capacidade"],
+            "geracao": ["val_geracaoverificada", "val_geracao"],
+            "programada": ["val_geracaoprogramada"],
+            "fator": ["val_fatorcapacidade"],
+            "lat": ["val_latitudesecaocoletora", "val_latitudepontoconexao", "val_latitude"],
+            "lon": ["val_longitudesecaocoletora", "val_longitudepontoconexao", "val_longitude"],
+        },
+    },
     "restricao_eolica": {
         "palavras": ["restricao_coff_eolica"], "preferir": "usi", "evitar": "detail",
         "obrigatorias": ["instante", "usina", "geracao", "referencia"],
