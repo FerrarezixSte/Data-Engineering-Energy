@@ -1,1 +1,86 @@
 name: Pipeline ONS e site
+
+on:
+  schedule:
+    - cron: "17 9 * * *"   # todo dia às 06:17 de Brasília (09:17 UTC): roda o pipeline e publica o site
+  workflow_dispatch:        # botão "Run workflow": roda o pipeline na hora
+  push:
+    branches: [main]        # alteração no site: só publica, sem rodar o pipeline
+
+permissions:
+  contents: write           # gravar os dados no repositório
+  pages: write              # publicar no GitHub Pages
+  id-token: write
+
+concurrency:
+  group: pipeline-ons
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ONS_MESES: "3"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+
+      - name: Cache dos arquivos brutos do ONS
+        uses: actions/cache@v4
+        with:
+          path: data_lake/raw
+          key: ons-raw-${{ github.run_id }}
+          restore-keys: ons-raw-
+
+      - name: Instalar dependências
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Bronze (download e padronização)
+        run: python pipeline/ingest_ons.py
+
+      - name: Silver e Gold com testes (dbt build)
+        run: dbt build --project-dir dbt --profiles-dir dbt
+
+      - name: Exportar JSON do site
+        run: python pipeline/export_site.py
+
+      - name: IA · previsão de geração solar para amanhã
+        continue-on-error: true   # um problema na previsão não impede a atualização dos outros gráficos
+        run: python pipeline/previsao_solar.py
+
+      - name: Gravar dados no repositório
+        run: |
+          git config user.name "pipeline-ons[bot]"
+          git config user.email "pipeline-ons@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "Sem mudanças nos dados."
+          else
+            git commit -m "dados: atualização ONS $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+  deploy:
+    needs: pipeline
+    if: always() && (needs.pipeline.result == 'success' || needs.pipeline.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main          # pega o commit com os dados recém-gravados
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
