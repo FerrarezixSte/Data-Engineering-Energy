@@ -1,4 +1,5 @@
-{{ config(materialized='view') }}
+-- materializada como tabela: Silver e quarentena leem exatamente a mesma avaliação
+{{ config(materialized='table') }}
 with tipada as (
     select
         coalesce(try_cast(instante as timestamp),
@@ -26,7 +27,9 @@ avaliada as (
     from tipada
 )
 select *,
+    -- a numeração considera só as linhas válidas; desempate fixo para o resultado ser sempre o mesmo
     case when motivo_rejeicao is null
-         then row_number() over (partition by chave_usina, instante order by ingested_at desc, source_file desc)
+         then row_number() over (partition by chave_usina, instante, (motivo_rejeicao is null)
+                                   order by ingested_at desc, source_file desc, geracao_mw desc nulls last)
     end as ordem_duplicata
 from avaliada
