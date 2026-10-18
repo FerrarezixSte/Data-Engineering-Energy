@@ -64,6 +64,7 @@ jobs:
             echo "Sem mudanças nos dados."
           else
             git commit -m "dados: atualização ONS $(date -u +%Y-%m-%d)"
+            git pull --rebase origin main   # se alguém mexeu no repositório durante a execução
             git push
           fi
 
@@ -84,7 +85,3 @@ jobs:
           path: .
       - id: deployment
         uses: actions/deploy-pages@v4
-
-                       git commit -m "dados: atualização ONS $(date -u +%Y-%m-%d)"
-               git pull --rebase origin main   # se alguém mexeu no repositório durante a execução
-               git push
