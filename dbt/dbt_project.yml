@@ -1,0 +1,16 @@
+name: ons_energia
+version: "1.0.0"
+config-version: 2
+profile: ons_energia
+
+model-paths: ["models"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  ons_energia:
+    silver:
+      +materialized: table
+    gold:
+      +materialized: table

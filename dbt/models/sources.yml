@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: "Bronze gerada por pipeline/ingest_ons.py: arquivos do ONS com colunas padronizadas, tudo como texto."
+    tables:
+      - name: geracao_usina
+        description: "Geração por usina em base horária (MWmed)."
+        meta:
+          external_location: "read_parquet('data_lake/bronze/geracao_usina/*.parquet', union_by_name=true)"
+      - name: restricao_eolica
+        description: "Restrição de operação (constrained-off) de usinas eólicas, base semi-horária."
+        meta:
+          external_location: "read_parquet('data_lake/bronze/restricao_eolica/*.parquet', union_by_name=true)"

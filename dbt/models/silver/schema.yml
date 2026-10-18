@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: silver_geracao_usina
+    description: "Geração horária por usina (MWmed), validada e sem duplicatas."
+    columns:
+      - name: instante
+        tests: [not_null]
+      - name: chave_usina
+        tests: [not_null]
+      - name: geracao_mw
+        tests: [not_null]
+      - name: tipo_fonte
+        tests:
+          - accepted_values:
+              values: ["SOLAR", "EOLICA", "HIDRAULICA", "NUCLEAR", "TERMICA"]
+  - name: silver_restricao_eolica
+    description: "Restrição de operação (constrained-off) de eólicas, validada."
+    columns:
+      - name: instante
+        tests: [not_null]
+      - name: chave_usina
+        tests: [not_null]
+      - name: restringido_mw
+        tests: [not_null]

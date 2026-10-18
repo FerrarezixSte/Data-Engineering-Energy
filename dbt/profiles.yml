@@ -1,0 +1,7 @@
+ons_energia:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ons.duckdb   # relativo à pasta onde o dbt roda (raiz do repositório)
+      threads: 4

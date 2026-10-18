@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c0b">
+<title>Stephanni Ferrarezi</title>
+<meta name="description" content="Portfólio de Stephanni Ferrarezi: engenheira eletricista e engenheira de dados e IA aplicada à geração de energia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: um "diagrama unifilar" vertical. Uma barra condutora (cobre) desce pela margem esquerda
+   e cada seção é uma derivação dela, com etiqueta de barra (B-01, B-02...) como em projeto elétrico.
+   Paleta preto + verde: --copper é o acento principal (verde), --grid é o verde secundário (menta). */
+:root {
+  --bg: #0a0c0b;          /* preto levemente esverdeado */
+  --surface: #111513;
+  --line: #222a26;
+  --fg: #e6ece8;
+  --muted: #8c9a92;
+  --copper: #2fd27a;      /* verde principal: acento único */
+  --copper-soft: rgba(47,210,122,.13);
+  --grid: #9fd9bd;        /* menta, uso secundário (previsão, orquestração) */
+  --todo: #e6c86e;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f3f6f4; --surface: #ffffff; --line: #d2dcd6; --fg: #0f1a14; --muted: #52645a;
+    --copper: #0f8a4a; --copper-soft: rgba(15,138,74,.10); --grid: #4f7d68; --todo: #8a6a07;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f3f6f4; --surface: #ffffff; --line: #d2dcd6; --fg: #0f1a14; --muted: #52645a;
+  --copper: #0f8a4a; --copper-soft: rgba(15,138,74,.10); --grid: #4f7d68; --todo: #8a6a07;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--copper); outline-offset: 3px; border-radius: 2px; }
+.wrap {
+  max-width: 1120px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.mono { font-family: var(--font-mono); }
+.todo {
+  color: var(--todo); border-bottom: 1px dashed var(--todo);
+  font-style: normal;
+}
+
+/* ---------- Header ---------- */
+header.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
+  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; gap: 24px; padding-block: 12px; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; letter-spacing: .02em; text-decoration: none; }
+.brand span { color: var(--copper); }
+nav.menu { display: flex; gap: 20px; margin-left: auto; flex-wrap: wrap; }
+nav.menu a { text-decoration: none; color: var(--muted); font-size: .9rem; }
+nav.menu a:hover { color: var(--fg); }
+.theme-btn {
+  font: 500 .78rem var(--font-mono); color: var(--fg); background: transparent;
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer;
+}
+.theme-btn:hover { border-color: var(--copper); }
+@media (max-width: 760px) { nav.menu { display: none; } .theme-btn { margin-left: auto; } }
+
+/* ---------- Busbar layout ---------- */
+main { position: relative; }
+.bus { position: relative; }
+.bus::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: max(16px, env(safe-area-inset-left, 0px));
+  width: 3px; background: linear-gradient(var(--copper), var(--copper)) no-repeat; opacity: .55;
+}
+@media (min-width: 1152px) { .bus::before { left: calc(50% - 560px); } }
+section.sec { position: relative; padding-block: 72px; }
+.sec-head { display: grid; gap: 6px; margin-bottom: 36px; padding-left: 28px; position: relative; }
+.sec-head::before {
+  content: ""; position: absolute; left: -5px; top: 6px; width: 13px; height: 13px;
+  border: 3px solid var(--copper); border-radius: 50%; background: var(--bg);
+}
+.tag-bus { font: 500 .75rem var(--font-mono); letter-spacing: .14em; color: var(--copper); text-transform: uppercase; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.05; margin: 0; }
+h2 { font-size: clamp(2rem, 4.4vw, 3rem); font-weight: 600; letter-spacing: .005em; }
+h3 { font-size: 1.45rem; font-weight: 600; }
+.sec-body { padding-left: 28px; }
+p { margin: 0; max-width: 66ch; }
+.muted { color: var(--muted); }
+
+/* ---------- Hero ---------- */
+.hero { padding-block: 64px 56px; }
+.hero-grid { display: grid; grid-template-columns: 1fr; gap: 40px; padding-left: 28px; }
+.hero-text { max-width: 760px; }
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.charts > * { min-width: 0; margin: 0; }
+.go { font: 500 .74rem var(--font-mono); color: var(--copper); text-decoration: none; white-space: nowrap; }
+.go:hover { text-decoration: underline; }
+@media (max-width: 860px) { .charts { grid-template-columns: 1fr; } }
+.hero-grid > * { min-width: 0; }
+.status {
+  display: inline-flex; align-items: center; gap: 8px; font: 500 .78rem var(--font-mono);
+  color: var(--grid); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px;
+}
+.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--grid); box-shadow: 0 0 0 4px color-mix(in srgb, var(--grid) 20%, transparent); }
+.hero h1 { font-size: clamp(2.9rem, 7vw, 5.4rem); font-weight: 700; letter-spacing: -.005em; margin: 22px 0 18px; }
+.hero h1 em { font-style: normal; color: var(--copper); }
+.role { font: 500 .85rem var(--font-mono); color: var(--muted); letter-spacing: .04em; margin-bottom: 4px; }
+.lead { font-size: 1.12rem; color: var(--fg); }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none; cursor: pointer;
+  font: 600 .92rem var(--font-body); padding: 11px 18px; border-radius: 4px;
+  border: 1px solid var(--line); color: var(--fg); background: transparent;
+}
+.btn.primary { background: var(--copper); border-color: var(--copper); color: var(--bg); }
+.btn:hover { border-color: var(--copper); }
+.scope {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 18px 12px;
+}
+.scope-head { display: flex; justify-content: space-between; gap: 12px; font: 500 .74rem var(--font-mono); color: var(--muted); margin-bottom: 8px; flex-wrap: wrap; }
+.scope-head b { color: var(--fg); font-weight: 500; }
+.curve { width: 100%; height: 230px; display: block; }
+.scope-legend { display: flex; gap: 16px; flex-wrap: wrap; font: .74rem var(--font-mono); color: var(--muted); margin-top: 6px; }
+.scope-legend span::before { content: ""; display: inline-block; width: 14px; height: 2px; margin-right: 6px; vertical-align: middle; background: var(--c); }
+@media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; gap: 36px; } }
+
+/* ---------- Sobre ---------- */
+.about { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; }
+.about > * { min-width: 0; }
+.about p + p { margin-top: 14px; }
+.facts { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.fact { display: grid; grid-template-columns: 110px 1fr; gap: 14px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.fact dt { font: 500 .75rem var(--font-mono); color: var(--copper); letter-spacing: .08em; text-transform: uppercase; padding-top: 3px; }
+.fact dd { margin: 0; }
+@media (max-width: 760px) { .about { grid-template-columns: 1fr; } .fact { grid-template-columns: 1fr; gap: 2px; } }
+
+/* ---------- Experiência ---------- */
+.timeline { display: grid; gap: 28px; }
+.job { display: grid; grid-template-columns: 180px 1fr; gap: 24px; padding-top: 24px; border-top: 1px solid var(--line); }
+.job > * { min-width: 0; }
+.job .when { font: 500 .8rem var(--font-mono); color: var(--muted); }
+.job .kind { display: inline-block; margin-top: 8px; font: 500 .7rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--copper); }
+.job h3 { margin-bottom: 4px; }
+.job .org { color: var(--muted); margin-bottom: 12px; }
+.job ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; max-width: 70ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.chip { font: .74rem var(--font-mono); border: 1px solid var(--line); border-radius: 3px; padding: 3px 8px; color: var(--muted); }
+@media (max-width: 700px) { .job { grid-template-columns: 1fr; gap: 8px; } }
+
+/* ---------- Projetos ---------- */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.filters button {
+  font: 500 .8rem var(--font-mono); background: transparent; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer;
+}
+.filters button[aria-pressed="true"] { color: var(--bg); background: var(--copper); border-color: var(--copper); }
+.projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.proj {
+  display: flex; flex-direction: column; gap: 12px; padding: 22px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+}
+.proj.featured { grid-column: 1 / -1; border-color: var(--copper); border-color: color-mix(in srgb, var(--copper) 45%, var(--line)); }
+.proj .cat { font: 500 .7rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--copper); }
+.proj .metrics { display: flex; flex-wrap: wrap; gap: 28px; padding-block: 6px; }
+.metric b { display: block; font-family: var(--font-display); font-size: 2rem; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.metric span { font: .74rem var(--font-mono); color: var(--muted); }
+.proj .links { display: flex; gap: 16px; margin-top: auto; padding-top: 6px; font: 500 .82rem var(--font-mono); }
+.proj .links a { color: var(--copper); text-decoration: none; }
+.proj .links a:hover { text-decoration: underline; }
+.proj.soon { background: transparent; border-style: dashed; }
+.badge-soon { align-self: flex-start; font: .7rem var(--font-mono); color: var(--muted); border: 1px dashed var(--line); padding: 2px 8px; border-radius: 3px; }
+
+/* ---------- Arquitetura ---------- */
+.diagram { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
+.diagram svg { display: block; min-width: 780px; width: 100%; height: auto; }
+.d-box { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+.d-store { fill: var(--copper-soft); stroke: var(--copper); stroke-width: 1.5; }
+.d-lane { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.d-orch { fill: var(--bg); stroke: var(--grid); stroke-width: 1.5; }
+.d-t { fill: var(--fg); font: 600 14px var(--font-body); }
+.d-s { fill: var(--muted); font: 12px var(--font-mono); }
+.d-l { fill: var(--copper); font: 600 12px var(--font-mono); letter-spacing: .08em; }
+.d-g { fill: var(--grid); font: 600 12px var(--font-mono); letter-spacing: .08em; }
+.d-medal { stroke-width: 1.5; }
+.d-bronze { fill: var(--bg); fill: color-mix(in srgb, #b8733a 22%, var(--bg)); stroke: #b8733a; }
+.d-silver { fill: var(--bg); fill: color-mix(in srgb, #9aa7ad 22%, var(--bg)); stroke: #9aa7ad; }
+.d-gold { fill: var(--bg); fill: color-mix(in srgb, #d6a92e 22%, var(--bg)); stroke: #d6a92e; }
+.d-flow { fill: none; stroke: var(--copper); stroke-width: 2; }
+.d-dash { fill: none; stroke: var(--grid); stroke-width: 1.5; stroke-dasharray: 5 5; }
+.d-head { fill: var(--copper); }
+.d-head-g { fill: var(--grid); }
+.layers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px; }
+.layers > div { min-width: 0; border-top: 3px solid var(--c); padding-top: 14px; }
+.layers h3 { font-size: 1.25rem; margin-bottom: 8px; }
+.layers ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: .94rem; }
+.lessons { margin-top: 32px; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.lesson { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+.lesson > * { min-width: 0; }
+.lesson .p { font: .86rem var(--font-mono); color: var(--muted); }
+@media (max-width: 760px) { .layers { grid-template-columns: 1fr; } .lesson { grid-template-columns: 1fr; gap: 6px; } }
+
+/* ---------- Stack ---------- */
+.stack { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 28px; }
+.stack h3 { font-size: 1.1rem; margin-bottom: 10px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.stack .chip { color: var(--fg); }
+
+/* ---------- Formação ---------- */
+.edu { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.edu-row { display: grid; grid-template-columns: 140px 1fr; gap: 20px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.edu-row > * { min-width: 0; }
+.edu-row .y { font: .82rem var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .edu-row { grid-template-columns: 1fr; gap: 2px; } }
+
+/* ---------- Contato ---------- */
+.contact h2 { max-width: 20ch; }
+.contact-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; align-items: center; }
+.email {
+  display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 4px;
+  padding: 8px 8px 8px 14px; font: .95rem var(--font-mono); max-width: 100%; overflow-wrap: anywhere;
+}
+.email button { font: 500 .78rem var(--font-mono); background: var(--copper-soft); color: var(--copper); border: 0; border-radius: 3px; padding: 6px 10px; cursor: pointer; }
+
+footer { border-top: 1px solid var(--line); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-block: 24px; font: .78rem var(--font-mono); color: var(--muted); }
+
+/* ---------- Interatividade: gráfico do topo ---------- */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px; gap: 2px; }
+.seg button { font: 500 .72rem var(--font-mono); background: transparent; color: var(--muted); border: 0; border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--copper); color: var(--bg); }
+.curve { cursor: pointer; touch-action: pan-y; }
+.curve:focus-visible { outline: 2px solid var(--copper); outline-offset: 2px; }
+.readout { font: .76rem var(--font-mono); color: var(--fg); min-height: 1.3em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+/* ---------- SCADA simulado ---------- */
+.scada { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.scada-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); font: .76rem var(--font-mono); color: var(--muted); }
+.scada-bar .live { display: inline-flex; align-items: center; gap: 8px; }
+.scada-bar .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--copper); }
+.scada.running .live i { animation: blink 1.5s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.pause { font: 500 .72rem var(--font-mono); color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 3px; padding: 4px 10px; cursor: pointer; }
+.scada-kpis { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+.kpi { padding: 14px; border-right: 1px solid var(--line); min-width: 0; }
+.kpi:last-child { border-right: 0; }
+.kpi b { display: block; font-family: var(--font-display); font-size: 1.9rem; font-weight: 600; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.kpi span { font: .72rem var(--font-mono); color: var(--muted); }
+.scada-main { display: grid; grid-template-columns: 1.25fr 1fr; }
+.scada-main > * { min-width: 0; }
+.units { display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr)); gap: 10px; padding: 14px; align-content: start; }
+.unit { text-align: left; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 10px; cursor: pointer; display: grid; gap: 5px; }
+.unit:hover { border-color: var(--copper); border-color: color-mix(in srgb, var(--copper) 50%, var(--line)); }
+.unit[aria-pressed="true"] { border-color: var(--copper); box-shadow: 0 0 0 1px var(--copper); }
+.u-name { font: 500 .72rem var(--font-mono); color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.u-val { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1; }
+.u-val small { font: .7rem var(--font-mono); color: var(--muted); margin-left: 3px; }
+.u-sub { font: .7rem var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--copper); transition: width .6s ease; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; background: var(--grid); }
+.dot.warn { background: var(--todo); }
+.dot.off { background: var(--muted); }
+.tags { border-left: 1px solid var(--line); padding: 14px; display: grid; gap: 16px; align-content: start; }
+.tags h3 { font-size: 1.05rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.tbl { overflow-x: auto; }
+.tbl table { width: 100%; border-collapse: collapse; font: .74rem var(--font-mono); }
+.tbl th, .tbl td { padding: 6px 4px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.tbl th { color: var(--muted); font-weight: 500; }
+.tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.q { color: var(--grid); }
+.events { list-style: none; margin: 0; padding: 0; font: .74rem var(--font-mono); display: grid; gap: 6px; }
+.events li { display: grid; grid-template-columns: 64px 1fr; gap: 8px; }
+.events .t { color: var(--muted); font-variant-numeric: tabular-nums; }
+.events .w { color: var(--todo); }
+.coff { margin-top: 48px; display: grid; gap: 14px; }
+.coff h3 { font-size: 1.6rem; }
+.coff-kpis { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 4px; margin-bottom: 12px; }
+.coff-kpis .kpi b { font-size: 1.6rem; }
+.coff-canvas { width: 100%; height: 240px; display: block; cursor: crosshair; touch-action: pan-y; }
+.scope-legend span.amb::before { height: 8px; background: var(--todo); background: color-mix(in srgb, var(--todo) 45%, transparent); }
+@media (max-width: 800px) { .coff-kpis { grid-template-columns: repeat(2, 1fr); } }
+.pause[aria-pressed="true"] { border-color: var(--todo); color: var(--todo); }
+.scada-note { padding: 10px 14px; border-top: 1px solid var(--line); font: .72rem var(--font-mono); color: var(--muted); }
+@media (max-width: 800px) {
+  .scada-main { grid-template-columns: 1fr; }
+  .tags { border-left: 0; border-top: 1px solid var(--line); }
+  .scada-kpis { grid-template-columns: repeat(2, 1fr); }
+  .kpi:nth-child(2) { border-right: 0; }
+  .kpi:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+}
+
+/* ---------- Arquitetura interativa ---------- */
+.node { cursor: pointer; }
+.node:focus { outline: none; }
+.node rect { transition: stroke .2s, stroke-width .2s; }
+.node:hover rect, .node:focus-visible rect, .node.sel rect { stroke: var(--copper); stroke-width: 2.5; }
+.node.active rect { stroke: var(--copper); stroke-width: 3; }
+.node.done rect { stroke: var(--grid); stroke-width: 2.5; }
+.d-flow.run { stroke-dasharray: 6 6; animation: flow .6s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -12; } }
+.arch-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 14px; font: .78rem var(--font-mono); color: var(--muted); }
+.arch-detail { margin-top: 14px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); display: grid; gap: 6px; }
+.arch-detail .k { font: 500 .72rem var(--font-mono); color: var(--copper); letter-spacing: .1em; text-transform: uppercase; }
+.arch-detail h3 { font-size: 1.35rem; }
+.log { list-style: none; margin: 6px 0 0; padding: 0; font: .76rem var(--font-mono); color: var(--muted); display: grid; gap: 3px; }
+.log li::before { content: "› "; color: var(--copper); }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio">S<span>.</span>Ferrarezi</a>
+    <nav class="menu" aria-label="Seções">
+      <a href="#sobre">Sobre</a>
+      <a href="#experiencia">Experiência</a>
+      <a href="#projetos">Projetos</a>
+      <a href="#scada">SCADA</a>
+      <a href="#previsao">IA</a>
+      <a href="#arquitetura">Arquitetura</a>
+      <a href="#stack">Stack</a>
+      <a href="#formacao">Formação</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <button class="theme-btn" id="theme-btn" type="button" aria-label="Alternar tema claro ou escuro">tema: auto</button>
+  </div>
+</header>
+
+<main class="bus" id="inicio">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <span class="status"><i></i>Aberta a oportunidades em dados e energia</span>
+          <h1>Da Geração de Energia<br>ao <em>Dashboard</em>.</h1>
+          <p class="role">STEPHANNI FERRAREZI · ENGENHEIRA ELETRICISTA · ENGENHARIA DE DADOS &amp; IA</p>
+          <p class="lead">Levo dados de geração de energia ao dashboard interativo: pipelines em Azure e Databricks, regras de qualidade que o negócio entende e modelos de IA para apoiar a operação.</p>
+          <div class="cta">
+            <a class="btn primary" href="#projetos">Ver projetos</a>
+            <a class="btn" href="#arquitetura">Ver arquitetura</a>
+            <a class="btn" href="#contato">Contato</a>
+          </div>
+        </div>
+        <div class="charts">
+          <figure class="scope" aria-label="Curva ilustrativa de geração solar">
+            <div class="scope-head"><span><b id="name-solar">UFV exemplo · solar</b> · potência ativa · MW × hora</span><a class="go" href="#scada" data-go="solar">Abrir no SCADA →</a></div>
+            <canvas class="curve" data-s="solar" tabindex="0" role="button" aria-label="Curva de geração solar ao longo de um dia. Clique para abrir esta usina no SCADA"></canvas>
+            <div class="scope-legend">
+              <span style="--c: var(--copper)">medido (SCADA)</span>
+              <span id="prev-solar" style="--c: var(--grid)">previsto (modelo)</span>
+              <span id="tag-solar" style="--c: transparent">dados ilustrativos</span>
+            </div>
+            <p class="readout" id="readout-solar" aria-live="polite"></p>
+          </figure>
+          <figure class="scope" aria-label="Curva ilustrativa de geração eólica">
+            <div class="scope-head"><span><b id="name-eol">EOL exemplo · eólica</b> · potência ativa · MW × hora</span><a class="go" href="#scada" data-go="eol">Abrir no SCADA →</a></div>
+            <canvas class="curve" data-s="eol" tabindex="0" role="button" aria-label="Curva de geração eólica ao longo de um dia. Clique para abrir esta usina no SCADA"></canvas>
+            <div class="scope-legend">
+              <span style="--c: var(--copper)">medido (SCADA)</span>
+              <span id="prev-eol" style="--c: var(--grid)">previsto (modelo)</span>
+              <span id="tag-eol" style="--c: transparent">dados ilustrativos</span>
+            </div>
+            <p class="readout" id="readout-eol" aria-live="polite"></p>
+          </figure>
+        </div>
+        <p class="muted mono" id="ons-nota" style="font-size:.74rem" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOBRE -->
+  <section class="sec" id="sobre">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-01 · Sobre</span><h2>Engenharia elétrica com olhar de dados.</h2></div>
+      <div class="sec-body about">
+        <div>
+          <p>Sou engenheira eletricista e trabalho com engenharia de dados e IA aplicadas ao setor de energia. Conheço o caminho físico da energia, da geração à medição, e uso isso para modelar dados que fazem sentido para quem opera e decide.</p>
+          <p>Hoje construo pipelines em arquitetura medalhão (Bronze, Silver e Gold) no Azure com Databricks, escrevo regras de qualidade a partir dos requisitos do negócio e entrego tabelas prontas para BI no SQL Server e no Looker.</p>
+          <p>Foram 8 anos no setor elétrico, entre usinas solares, subestações e obras de média tensão, coordenando orçamento, cronograma e equipes de campo com mais de 60 pessoas. Por isso começo pela pergunta do negócio antes de escrever a primeira linha de SQL.</p>
+        </div>
+        <dl class="facts">
+          <div class="fact"><dt>Domínio</dt><dd>Geração de energia, medição e operação de ativos elétricos</dd></div>
+          <div class="fact"><dt>Dados</dt><dd>Pipelines batch e streaming, Delta Lake, qualidade de dados, modelagem para BI</dd></div>
+          <div class="fact"><dt>IA</dt><dd>Previsão de geração, detecção de anomalias em séries temporais de sensores</dd></div>
+          <div class="fact"><dt>Formação</dt><dd>Eng. Elétrica (UFPR), Mestrado Profissional em Geração Distribuída (PUC Minas), Pós em Eng. de Dados e IA</dd></div>
+          <div class="fact"><dt>Local</dt><dd>Curitiba, PR · remoto ou híbrido</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIÊNCIA -->
+  <section class="sec" id="experiencia">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-02 · Experiência</span><h2>Trajetória profissional.</h2></div>
+      <div class="sec-body timeline">
+        <article class="job">
+          <div><div class="when">out/2026 – atual</div><span class="kind">Dados</span></div>
+          <div>
+            <h3>Engenheira de Dados (estágio)</h3>
+            <div class="org">Empregadados · remoto · varejo alimentício omnichannel com 30 lojas e e-commerce</div>
+            <ul>
+              <li>Arquitetura no Azure com ingestão batch e streaming pelo Databricks a partir do Data Lake Gen2, camadas Bronze, Silver e Gold, data warehouse no SQL Server e dashboards no Looker.</li>
+              <li>Implementação de 5 regras técnicas de qualidade (chave UUID, integridade com a tabela de lojas, valores, domínio de pagamento e particionamento) sobre 375 mil transações, com quarentena dos registros rejeitados.</li>
+              <li>Camada Gold com 6 tabelas de KPIs de negócio, gravadas em Delta com MERGE (upsert) e publicadas no SQL Server para dashboards no Looker.</li>
+              <li>Streaming com Spark Structured Streaming e checagens de qualidade em tempo real; GMV em janelas de 1h, 6h e 24h, top 10 SKUs e alertas de desconto acima de 40% e de queda de volume.</li>
+              <li>Data warehouse com 2 anos de histórico nos dois canais, LTV omnichannel por CPF, segmentação RFM semanal e análise de coortes.</li>
+            </ul>
+            <div class="chips"><span class="chip">Structured Streaming</span><span class="chip">Azure ADLS Gen2</span><span class="chip">Databricks</span><span class="chip">PySpark</span><span class="chip">Delta Lake</span><span class="chip">SQL Server</span><span class="chip">Looker</span></div>
+          </div>
+        </article>
+        <article class="job">
+          <div><div class="when">jun/2025 – mai/2026</div><span class="kind">Engenharia elétrica</span></div>
+          <div>
+            <h3>Engenheira Eletricista</h3>
+            <div class="org">Impex Comércio e Serviços · Curitiba, PR</div>
+            <ul>
+              <li>Levantamento e diagnóstico de instalações elétricas em prédios públicos de licitações municipais no Paraná, consolidando os dados de campo em projetos, quantitativos e listas de materiais.</li>
+              <li>Pedidos de aumento de carga junto à COPEL, dimensionamento de sistemas fotovoltaicos e coordenação de equipes terceirizadas até o comissionamento.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="job">
+          <div><div class="when">2018 – 2024</div><span class="kind">Energia solar e obras</span></div>
+          <div>
+            <h3>Coordenação e supervisão de obras de energia</h3>
+            <div class="org">GELIET · Brasol · A.Dias Solar · Araxá Engenharia · Alexandria Solar · MEPEN Energia · DGA Engenharia</div>
+            <ul>
+              <li>Validação de ensaios de cabos de média tensão (resistência de isolamento, hipot, continuidade) e logística de mais de 60 pessoas em campo (GELIET, 2024).</li>
+              <li>Orçamento, cronograma e controle de custos de usinas solares e subestações, do estudo de solo à vistoria da concessionária (A.Dias Solar, 2023–2024).</li>
+              <li>Análise de relatórios de geração e simulações em PVsyst, XGSLab e Cableizer, com revisão de projetos e da arquitetura de comunicação SCADA (Araxá Engenharia, 2022–2023).</li>
+              <li>Liderança do time de projeto elétrico de usinas acima de 1 MWp, com estudos de geração e de sobrecarga de inversores (Alexandria Solar, 2021–2022).</li>
+              <li>Retrofit de subestações de 2 MVA na ENSP/Fiocruz, no Rio de Janeiro, e orçamentos de grandes obras elétricas (DGA Engenharia, 2018–2020).</li>
+            </ul>
+            <div class="chips"><span class="chip">PVsyst</span><span class="chip">XGSLab</span><span class="chip">Cableizer</span><span class="chip">SCADA solar e eólico</span><span class="chip">Média tensão</span><span class="chip">Orçamento e custos</span></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJETOS -->
+  <section class="sec" id="projetos">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-03 · Projetos</span><h2>Projetos selecionados.</h2></div>
+      <div class="sec-body">
+        <div class="filters" role="group" aria-label="Filtrar projetos">
+          <button type="button" id="f-todos" data-f="todos" aria-pressed="true">Todos</button>
+          <button type="button" id="f-dados" data-f="dados" aria-pressed="false">Engenharia de dados</button>
+          <button type="button" id="f-ia" data-f="ia" aria-pressed="false">IA</button>
+          <button type="button" id="f-energia" data-f="energia" aria-pressed="false">Energia</button>
+        </div>
+        <div class="projects">
+          <article class="proj featured" data-cat="dados">
+            <span class="cat">Engenharia de dados · Azure</span>
+            <h3>Pipeline medalhão de vendas físicas</h3>
+            <p class="muted">Varejo alimentício com 30 lojas físicas: ingestão de dados brutos do Data Lake, validação com regras técnicas na Silver e KPIs de negócio na Gold, publicados no SQL Server para o Looker. Inclui quarentena de registros inválidos e conferência automática Bronze × Silver × Gold.</p>
+            <div class="metrics">
+              <div class="metric"><b>375 mil</b><span>transações validadas</span></div>
+              <div class="metric"><b>5</b><span>regras técnicas na Silver</span></div>
+              <div class="metric"><b>6</b><span>tabelas Gold para BI</span></div>
+              <div class="metric"><b>0</b><span>divergências na conferência</span></div>
+            </div>
+            <div class="chips"><span class="chip">PySpark</span><span class="chip">Delta MERGE</span><span class="chip">ADLS Gen2</span><span class="chip">Databricks serverless</span><span class="chip">SQL Server</span><span class="chip">Looker</span></div>
+            <div class="links"><a href="#arquitetura">Arquitetura →</a><a href="https://github.com/FerrarezixSte" target="_blank" rel="noopener">GitHub →</a></div>
+          </article>
+          <article class="proj" data-cat="ia energia">
+            <span class="cat">IA · Energia</span>
+            <h3>Previsão de geração solar para o dia seguinte</h3>
+            <p class="muted">Gradient boosting treinado com a geração horária real de uma usina (ONS) e o tempo da região (Open-Meteo). Roda todo dia no pipeline aberto, mede o erro nos últimos 14 dias contra a persistência e publica a previsão de amanhã neste site.</p>
+            <div class="chips"><span class="chip">Python</span><span class="chip">scikit-learn</span><span class="chip">Open-Meteo</span><span class="chip">séries temporais</span><span class="chip">GitHub Actions</span></div>
+            <div class="links"><a href="#previsao">Ver previsão →</a></div>
+          </article>
+          <article class="proj" data-cat="dados energia">
+            <span class="cat">Engenharia de dados · Energia</span>
+            <h3>Pipeline ONS: geração renovável e restrições</h3>
+            <p class="muted">Dados abertos do Operador Nacional do Sistema: geração horária por usina, fator de capacidade e restrição de operação de eólicas. Bronze com os arquivos originais, Silver com regras de qualidade e quarentena, Gold com matriz mensal, curva típica por estado e energia eólica perdida por constrained-off.</p>
+            <div class="chips"><span class="chip">ONS dados abertos</span><span class="chip">PySpark</span><span class="chip">Delta MERGE</span><span class="chip">SQL Server</span><span class="chip">Looker</span></div>
+            <div class="links"><a href="#restricao">Ver restrições →</a></div>
+          </article>
+          <article class="proj" data-cat="dados energia">
+            <span class="cat">Engenharia de dados · Open source</span>
+            <h3>Pipeline aberto: GitHub Actions + DuckDB + dbt</h3>
+            <p class="muted">A mesma ideia sem nuvem paga: todo dia o GitHub Actions baixa os dados do ONS, o DuckDB processa e o dbt monta Silver e Gold com testes de qualidade. O resultado é publicado neste site, e é dele que vêm as curvas reais do topo da página.</p>
+            <div class="metrics">
+              <div class="metric"><b>1×/dia</b><span>atualização automática</span></div>
+              <div class="metric"><b>22</b><span>testes dbt por execução</span></div>
+              <div class="metric"><b>R$ 0</b><span>custo de infraestrutura</span></div>
+            </div>
+            <div class="chips"><span class="chip">GitHub Actions</span><span class="chip">DuckDB</span><span class="chip">dbt Core</span><span class="chip">Parquet</span><span class="chip">Python</span></div>
+            <div class="links"><a href="https://github.com/FerrarezixSte/FerrarezixSte.github.io" target="_blank" rel="noopener">Código no GitHub →</a></div>
+          </article>
+          <article class="proj soon" data-cat="ia energia">
+            <span class="badge-soon">em construção</span>
+            <span class="cat">IA · Energia</span>
+            <h3>Anomalias em sensores de ativos</h3>
+            <p class="muted">Detecção de leituras fora do padrão (temperatura de transformador, corrente de string) para priorizar manutenção antes da falha.</p>
+            <div class="chips"><span class="chip">Isolation Forest</span><span class="chip">PySpark</span><span class="chip">manutenção preditiva</span></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCADA -->
+  <section class="sec" id="scada">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-04 · SCADA</span><h2>Sala de controle: solar e eólica.</h2></div>
+      <div class="sec-body">
+        <p class="muted" style="margin-bottom:20px">É daqui que vêm os dados de uma usina: o SCADA lê cada inversor ou aerogerador, grava as tags com carimbo de tempo e qualidade e dispara alarmes. Escolha a usina, clique em uma unidade para ver as tags dela e acompanhe os eventos.</p>
+        <div class="scada running" id="scada-box">
+          <div class="scada-bar">
+            <div class="seg" role="group" aria-label="Escolher usina">
+              <button type="button" id="sc-solar" data-p="solar" aria-pressed="true">Solar · UFV</button>
+              <button type="button" id="sc-eol" data-p="eol" aria-pressed="false">Eólica · EOL</button>
+            </div>
+            <span class="live"><i></i><span id="sc-name">UFV Exemplo · 35 MWp</span></span>
+            <span id="sc-clock">--:--:--</span>
+            <span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button type="button" class="pause" id="sc-coff" aria-pressed="false" hidden>Simular ordem do ONS</button><button type="button" class="pause" id="sc-pause">Pausar</button></span>
+          </div>
+          <div class="scada-kpis" id="sc-kpis"></div>
+          <div class="scada-main">
+            <div class="units" id="sc-units" role="group" aria-label="Unidades geradoras"></div>
+            <div class="tags">
+              <div>
+                <h3 id="sc-unit-title">Tags</h3>
+                <div class="tbl"><table><thead><tr><th>Tag</th><th style="text-align:right">Valor</th><th>Un.</th><th>Qual.</th></tr></thead><tbody id="sc-tags"></tbody></table></div>
+              </div>
+              <div>
+                <h3>Eventos</h3>
+                <ul class="events" id="sc-events" aria-live="polite"></ul>
+              </div>
+            </div>
+          </div>
+          <div class="scada-note">Simulação ilustrativa no navegador. Os valores seguem a física de cada fonte (irradiância e temperatura no solar; curva de potência, pitch e rotor no eólico), mas não são dados reais de nenhuma usina. No eólico, o botão "Simular ordem do ONS" limita o parque a cerca de metade da potência disponível, como numa restrição de operação.</div>
+        </div>
+
+        <div class="coff" id="restricao">
+          <div>
+            <span class="tag-bus">Restrição de operação · constrained-off</span>
+            <h3>O que o parque podia gerar e o que gerou.</h3>
+            <p class="muted" style="margin-top:8px">Quando a rede de transmissão não comporta toda a geração, o ONS ordena que parques eólicos reduzam a potência. A diferença entre a geração de referência (o que o vento permitia) e a geração verificada é energia perdida. É um dos conjuntos que o pipeline ONS processa na camada Gold.</p>
+          </div>
+          <figure class="scope" style="margin:0" aria-label="Gráfico ilustrativo de restrição de operação de um parque eólico">
+            <div class="scope-head"><span><b id="coff-name">EOL exemplo · 120 MW</b> · base semi-horária · MW × hora</span><span id="coff-tag">dados ilustrativos</span></div>
+            <div class="coff-kpis" id="coff-kpis"></div>
+            <canvas class="coff-canvas" id="coff-chart" role="img" aria-label="Curvas de geração de referência e verificada de um parque eólico, com o período de restrição destacado"></canvas>
+            <div class="scope-legend">
+              <span style="--c: var(--grid)">referência (podia gerar)</span>
+              <span style="--c: var(--copper)">verificada (gerou)</span>
+              <span class="amb" style="--c: transparent">energia restringida</span>
+            </div>
+            <p class="readout" id="coff-readout" aria-live="polite"></p>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREVISÃO (IA) -->
+  <section class="sec" id="previsao">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-05 · IA</span><h2>Previsão de geração solar para amanhã.</h2></div>
+      <div class="sec-body">
+        <p class="muted" style="margin-bottom:20px">Um modelo de machine learning aprende a relação entre o tempo e a geração real de uma usina solar e, todo dia, prevê a geração hora a hora do dia seguinte. O gráfico mostra os últimos dias (real × previsto, com dias fora do treino) e a previsão para amanhã.</p>
+        <figure class="scope" style="margin:0" aria-label="Gráfico de geração solar real e prevista">
+          <div class="scope-head"><span><b id="pv-name">UFV exemplo</b> · potência ativa · MW por hora</span><span id="pv-tag">dados ilustrativos</span></div>
+          <div class="coff-kpis" id="pv-kpis"></div>
+          <canvas class="coff-canvas" id="pv-chart" role="img" aria-label="Geração real e prevista nos últimos dias e previsão para amanhã"></canvas>
+          <div class="scope-legend">
+            <span style="--c: var(--copper)">real (ONS)</span>
+            <span style="--c: var(--grid)">previsto pelo modelo</span>
+            <span class="amb" style="--c: transparent">previsão para amanhã</span>
+          </div>
+          <p class="readout" id="pv-readout" aria-live="polite"></p>
+        </figure>
+        <div class="lessons" aria-label="Como funciona a previsão">
+          <div class="lesson"><span class="p">Dados</span><p>Geração horária real da usina, do ONS, e o tempo da região, do Open-Meteo: irradiância global, direta e difusa, temperatura e nebulosidade.</p></div>
+          <div class="lesson"><span class="p">Modelo</span><p>Gradient boosting (scikit-learn) com hora do dia e época do ano. Treina com cerca de 90 dias e é avaliado nos últimos 14, que ficam fora do treino.</p></div>
+          <div class="lesson"><span class="p">Comparação</span><p>O erro é comparado com a persistência (repetir a geração de ontem). O ganho mostra quanto o modelo erra menos que a regra mais simples.</p></div>
+          <div class="lesson"><span class="p">Uso no setor</span><p>Previsão de geração entra na programação da operação, na comercialização de energia e no planejamento de manutenção nos dias de menor produção.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARQUITETURA -->
+  <section class="sec" id="arquitetura">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-06 · Arquitetura</span><h2>Do dado bruto ao dashboard.</h2></div>
+      <div class="sec-body">
+        <p class="muted" style="margin-bottom:20px">Arquitetura de referência do projeto: duas trilhas de processamento (batch e streaming) no mesmo Data Lake, publicação no SQL Server e orquestração versionada.</p>
+        <div class="diagram">
+          <svg viewBox="0 0 1000 490" role="group" aria-label="Diagrama da arquitetura. Cada bloco é clicável e mostra o que acontece naquela etapa.">
+            <defs>
+              <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-head" d="M0 0L10 5L0 10z"/></marker>
+              <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-head-g" d="M0 0L10 5L0 10z"/></marker>
+            </defs>
+            <!-- armazenamento (fundo) -->
+            <rect class="d-store" x="350" y="25" width="390" height="330" rx="8"/>
+            <text class="d-l" x="366" y="47">ARMAZENAMENTO · ADLS GEN2</text>
+            <rect class="d-lane" x="362" y="62" width="366" height="123" rx="5"/>
+            <text class="d-s" x="374" y="82">processamento batch</text>
+            <rect class="d-lane" x="362" y="212" width="366" height="123" rx="5"/>
+            <text class="d-s" x="374" y="232">processamento streaming</text>
+            <!-- fluxos -->
+            <path class="d-flow fb" d="M170 135H198" marker-end="url(#ah)"/>
+            <path class="d-flow" d="M170 285H198" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M325 135H372" marker-end="url(#ah)"/>
+            <path class="d-flow" d="M325 285H372" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M474 135H492" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M594 135H612" marker-end="url(#ah)"/>
+            <path class="d-flow" d="M474 285H492" marker-end="url(#ah)"/>
+            <path class="d-flow" d="M594 285H612" marker-end="url(#ah)"/>
+            <path class="d-flow fb" d="M718 135H750V190H768" marker-end="url(#ah)"/>
+            <path class="d-flow" d="M718 285H750V190"/>
+            <path class="d-flow fb" d="M866 190H888" marker-end="url(#ah)"/>
+            <path class="d-dash" d="M300 435H262V322" marker-end="url(#ahg)"/>
+            <path class="d-dash" d="M545 400V357" marker-end="url(#ahg)"/>
+            <path class="d-dash" d="M730 435H818V232" marker-end="url(#ahg)"/>
+            <!-- blocos clicáveis -->
+            <g class="node" data-k="fonte_b" tabindex="0" role="button" aria-label="Fonte batch"><rect class="d-box" x="20" y="90" width="150" height="90" rx="6"/><text class="d-l" x="34" y="114">FONTE BATCH</text><text class="d-t" x="34" y="140">Azure Data Lake</text><text class="d-s" x="34" y="160">Gen2 · arquivos</text></g>
+            <g class="node" data-k="fonte_s" tabindex="0" role="button" aria-label="Fonte tempo real"><rect class="d-box" x="20" y="240" width="150" height="90" rx="6"/><text class="d-l" x="34" y="264">TEMPO REAL</text><text class="d-t" x="34" y="290">Azure Data Lake</text><text class="d-s" x="34" y="310">Gen2 · eventos</text></g>
+            <g class="node" data-k="ing_b" tabindex="0" role="button" aria-label="Ingestão batch"><rect class="d-box" x="200" y="100" width="125" height="70" rx="6"/><text class="d-t" x="214" y="128">Ingestão batch</text><text class="d-s" x="214" y="150">Databricks</text></g>
+            <g class="node" data-k="ing_s" tabindex="0" role="button" aria-label="Ingestão streaming"><rect class="d-box" x="200" y="250" width="125" height="70" rx="6"/><text class="d-t" x="214" y="278">Ingestão stream</text><text class="d-s" x="214" y="300">Databricks</text></g>
+            <g class="node" data-k="bronze_b" tabindex="0" role="button" aria-label="Bronze batch"><rect class="d-medal d-bronze" x="374" y="100" width="100" height="70" rx="5"/><text class="d-t" x="388" y="128">Bronze</text><text class="d-s" x="388" y="150">dados brutos</text></g>
+            <g class="node" data-k="silver_b" tabindex="0" role="button" aria-label="Silver batch"><rect class="d-medal d-silver" x="494" y="100" width="100" height="70" rx="5"/><text class="d-t" x="508" y="128">Silver</text><text class="d-s" x="508" y="150">validados</text></g>
+            <g class="node" data-k="gold_b" tabindex="0" role="button" aria-label="Gold batch"><rect class="d-medal d-gold" x="614" y="100" width="104" height="70" rx="5"/><text class="d-t" x="628" y="128">Gold</text><text class="d-s" x="628" y="150">KPIs</text></g>
+            <g class="node" data-k="bronze_s" tabindex="0" role="button" aria-label="Bronze streaming"><rect class="d-medal d-bronze" x="374" y="250" width="100" height="70" rx="5"/><text class="d-t" x="388" y="278">Bronze</text><text class="d-s" x="388" y="300">eventos brutos</text></g>
+            <g class="node" data-k="silver_s" tabindex="0" role="button" aria-label="Silver streaming"><rect class="d-medal d-silver" x="494" y="250" width="100" height="70" rx="5"/><text class="d-t" x="508" y="278">Silver</text><text class="d-s" x="508" y="300">eventos tratados</text></g>
+            <g class="node" data-k="gold_s" tabindex="0" role="button" aria-label="Gold tempo real"><rect class="d-medal d-gold" x="614" y="250" width="104" height="70" rx="5"/><text class="d-t" x="628" y="278">Gold</text><text class="d-s" x="628" y="300">tempo real</text></g>
+            <g class="node" data-k="sql" tabindex="0" role="button" aria-label="SQL Server"><rect class="d-box" x="770" y="150" width="96" height="80" rx="6"/><text class="d-t" x="784" y="186">SQL Server</text><text class="d-s" x="784" y="208">tabelas Gold</text></g>
+            <g class="node" data-k="looker" tabindex="0" role="button" aria-label="Looker"><rect class="d-box" x="890" y="130" width="96" height="120" rx="6"/><text class="d-t" x="904" y="166">Looker</text><text class="d-s" x="904" y="190">dashboards</text><text class="d-s" x="904" y="208">e relatórios</text></g>
+            <g class="node" data-k="orch" tabindex="0" role="button" aria-label="Orquestração"><rect class="d-orch" x="300" y="400" width="430" height="70" rx="6"/><text class="d-g" x="316" y="424">CONTROLE DE CÓDIGO E ORQUESTRAÇÃO</text><text class="d-t" x="316" y="452">GitHub  →  Databricks Jobs</text><text class="d-s" x="540" y="452">agendamento</text></g>
+          </svg>
+        </div>
+        <div class="arch-bar">
+          <button type="button" class="btn primary" id="arch-run">Executar pipeline batch</button>
+          <span>ou clique em um bloco do diagrama</span>
+        </div>
+        <div class="arch-detail" id="arch-detail" aria-live="polite">
+          <span class="k" id="arch-k">Etapa</span>
+          <h3 id="arch-t">Clique em um bloco</h3>
+          <p class="muted" id="arch-d">Cada bloco mostra o que acontece naquela etapa. O botão simula uma execução do job batch, da fonte ao dashboard, com os números reais do projeto.</p>
+          <ul class="log" id="arch-log"></ul>
+        </div>
+
+        <div class="layers">
+          <div style="--c:#b8733a">
+            <h3>Bronze</h3>
+            <ul>
+              <li>Cópia fiel da fonte em Delta</li>
+              <li>Colunas de auditoria: arquivo de origem e hora de ingestão</li>
+            </ul>
+          </div>
+          <div style="--c:#9aa7ad">
+            <h3>Silver · regras técnicas</h3>
+            <ul>
+              <li>R1 id_transacao em UUID, sem nulos nem duplicatas</li>
+              <li>R2 loja existente no cadastro (chave estrangeira)</li>
+              <li>R3 valor da venda maior que zero</li>
+              <li>R4 pagamento em Cartão, Dinheiro ou Pix</li>
+              <li>R5 particionamento por ano e mês</li>
+            </ul>
+          </div>
+          <div style="--c:#d6a92e">
+            <h3>Gold · regras de negócio</h3>
+            <ul>
+              <li>Receita por loja e mês, com variação MoM</li>
+              <li>Ticket médio por loja e meio de pagamento</li>
+              <li>% de vendas com CPF identificado</li>
+              <li>Caixas sobrecarregados (3× a média do dia)</li>
+              <li>Vendas em feriados nacionais</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="lessons" aria-label="Decisões técnicas">
+          <div class="lesson"><span class="p">Registro inválido não some</span><p>Em vez de descartar, a Silver grava os rejeitados numa tabela de quarentena com o motivo de cada regra violada. A validação confere Silver + rejeitados = Bronze a cada execução.</p></div>
+          <div class="lesson"><span class="p">Compute serverless tem limites</span><p>Sem configuração global de credenciais, cache ou JDBC genérico, a leitura usa opções por consulta, a listagem de pastas usa o SDK do Azure e a publicação usa o conector nativo do SQL Server.</p></div>
+          <div class="lesson"><span class="p">Upsert idempotente</span><p>As tabelas Gold são atualizadas com MERGE pela chave de cada KPI. Rodar o job duas vezes não duplica linhas.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section class="sec" id="stack">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-07 · Stack</span><h2>Competências técnicas.</h2></div>
+      <div class="sec-body stack">
+        <div><h3>Dados</h3><div class="chips"><span class="chip">Python</span><span class="chip">PySpark</span><span class="chip">SQL</span><span class="chip">dbt Core</span><span class="chip">DuckDB</span><span class="chip">Spark Structured Streaming</span><span class="chip">Delta Lake</span><span class="chip">Qualidade de dados</span><span class="chip">Modelagem dimensional</span></div></div>
+        <div><h3>Cloud</h3><div class="chips"><span class="chip">Azure Data Lake Gen2</span><span class="chip">Databricks</span><span class="chip">Azure SQL / SQL Server</span><span class="chip">Databricks Jobs</span></div></div>
+        <div><h3>BI e IA</h3><div class="chips"><span class="chip">Looker</span><span class="chip">Power BI</span><span class="chip">Séries temporais</span><span class="chip">scikit-learn</span><span class="chip">Previsão de geração</span><span class="chip">pandas</span></div></div>
+        <div><h3>Engenharia elétrica</h3><div class="chips"><span class="chip">Energia solar fotovoltaica</span><span class="chip">Subestações</span><span class="chip">Média tensão</span><span class="chip">PVsyst</span><span class="chip">XGSLab</span><span class="chip">Cableizer</span><span class="chip">SCADA solar e eólico</span></div></div>
+        <div><h3>Engenharia de software</h3><div class="chips"><span class="chip">Git e GitHub</span><span class="chip">GitHub Actions</span><span class="chip">Variáveis de ambiente e segredos</span><span class="chip">Documentação</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMAÇÃO -->
+  <section class="sec" id="formacao">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-08 · Formação</span><h2>Formação e certificações.</h2></div>
+      <div class="sec-body edu">
+        <div class="edu-row"><span class="y">2026</span><div><b>Pós-graduação em Engenharia de Dados e IA</b><div class="muted">Anhanguera</div></div></div>
+        <div class="edu-row"><span class="y">2023</span><div><b>Projeto de Usinas Solares até 5 MWp</b><div class="muted">Canal Solar · curso</div></div></div>
+        <div class="edu-row"><span class="y">2022</span><div><b>Mestrado Profissional em Geração Distribuída e Energias Renováveis</b><div class="muted">PUC Minas</div></div></div>
+        <div class="edu-row"><span class="y">2020</span><div><b>Projeto de Aterramento para Usinas Solares acima de 1 MWp</b><div class="muted">Canal Solar · curso</div></div></div>
+        <div class="edu-row"><span class="y">2019</span><div><b>Bacharelado em Engenharia Elétrica</b><div class="muted">Universidade Federal do Paraná (UFPR)</div></div></div>
+        <div class="edu-row"><span class="y">Idiomas</span><div><b>Português nativo · Inglês intermediário</b></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section class="sec contact" id="contato">
+    <div class="wrap">
+      <div class="sec-head"><span class="tag-bus">B-09 · Contato</span><h2>Tem dados de energia para organizar? Vamos conversar.</h2></div>
+      <div class="sec-body">
+        <div class="contact-grid">
+          <span class="email"><span id="email-text">dataenginner.ste@gmail.com</span><button type="button" id="copy-email">Copiar</button></span>
+          <a class="btn" href="https://www.linkedin.com/in/stephanni-ferrarezi" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="btn" href="https://github.com/FerrarezixSte" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <p class="muted" id="copy-msg" style="margin-top:10px" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap"><span>© 2026 Stephanni Ferrarezi</span><span>engenharia elétrica · dados · IA</span></div>
+</footer>
+
+<script>
+(function () {
+  // ---------- tema ----------
+  var root = document.documentElement, btn = document.getElementById('theme-btn');
+  var order = ['auto', 'dark', 'light'];
+  function apply(mode) {
+    if (mode === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', mode);
+    btn.textContent = 'tema: ' + (mode === 'auto' ? 'auto' : mode === 'dark' ? 'escuro' : 'claro');
+    draw();
+  }
+  var mode = 'auto';
+  try { mode = localStorage.getItem('sf-theme') || 'auto'; } catch (e) {}
+  btn.addEventListener('click', function () {
+    mode = order[(order.indexOf(mode) + 1) % order.length];
+    try { localStorage.setItem('sf-theme', mode); } catch (e) {}
+    apply(mode);
+  });
+
+  // ---------- filtros ----------
+  var fbtns = document.querySelectorAll('.filters button');
+  fbtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var f = b.dataset.f;
+      fbtns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      document.querySelectorAll('.proj').forEach(function (p) {
+        p.hidden = !(f === 'todos' || p.dataset.cat.split(' ').indexOf(f) >= 0);
+      });
+    });
+  });
+
+  // ---------- copiar e-mail ----------
+  var msg = document.getElementById('copy-msg');
+  document.getElementById('copy-email').addEventListener('click', function () {
+    var el = document.getElementById('email-text'), t = el.textContent;
+    function selectIt() {
+      var r = document.createRange(); r.selectNodeContents(el);
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      msg.textContent = 'E-mail selecionado. Use Ctrl+C para copiar.';
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(function () { msg.textContent = 'E-mail copiado.'; }, selectIt);
+    } else selectIt();
+  });
+
+  // ---------- utilidades ----------
+  var reduce = false;
+  try { reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) {}
+  function fmt(v, d) { return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function rnd(a) { return (Math.random() * 2 - 1) * a; }
+  function dois(n) { return (n < 10 ? '0' : '') + n; }
+  function hhmm(h) { var m = Math.round(h * 60); return dois(Math.floor(m / 60) % 24) + ':' + dois(m % 60); }
+
+  // ---------- curvas de geração: solar e eólica lado a lado ----------
+  // Começam com dados ilustrativos; se data/ons.json existir (gerado pelo pipeline), trocam por dados reais do ONS.
+  var MODELS = {
+    solar: {
+      prev: function (h) { return (h < 6 || h > 18.5) ? 0 : 40 * Math.pow(Math.sin(Math.PI * (h - 6) / 12.5), 1.6); },
+      noise: function (h, i, v) { if (h > 13.5 && h < 15.5) v *= 0.55 + 0.3 * Math.abs(Math.sin(h * 7)); return v * (0.97 + 0.06 * Math.sin(i * 2.3)); }
+    },
+    eol: {
+      prev: function (h) { return clamp(19 + 11 * Math.cos(2 * Math.PI * (h - 2) / 24), 0, 40); },
+      noise: function (h, i, v) { return clamp(v + 4.5 * Math.sin(i * 0.9) + 2.5 * Math.sin(i * 2.7) - (h > 9 && h < 11 ? 6 : 0), 0, 40); }
+    }
+  };
+  function escala(max) { // topo "redondo" do eixo e 5 marcas
+    var passos = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10], mag = Math.pow(10, Math.floor(Math.log(Math.max(max, 1) / 4) / Math.LN10)), p = 1;
+    for (var i = 0; i < passos.length; i++) { p = passos[i] * mag; if (p * 4 >= max * 1.08) break; }
+    return { top: p * 4.5, ticks: [0, p, 2 * p, 3 * p, 4 * p] };
+  }
+  var charts = [];
+  document.querySelectorAll('canvas.curve').forEach(function (cv) {
+    var s = cv.dataset.s, m = MODELS[s], data = [];
+    for (var i = 0; i <= 96; i++) { var h = i / 4; data.push([h, Math.max(0, m.noise(h, i, m.prev(h)))]); }
+    charts.push({ cv: cv, s: s, prev: m.prev, data: data, real: null, sc: escala(40), hover: null, geom: null, out: document.getElementById('readout-' + s) });
+  });
+  function drawChart(ch) {
+    var cv = ch.cv, data = ch.data;
+    var css = getComputedStyle(root), c = function (n) { return css.getPropertyValue(n).trim(); };
+    var w = cv.clientWidth, hgt = cv.clientHeight, dpr = window.devicePixelRatio || 1;
+    if (!w) return;
+    cv.width = w * dpr; cv.height = hgt * dpr;
+    var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, hgt);
+    var L = 40, R = 16, T = 8, B = 24, pw = w - L - R, ph = hgt - T - B, top = ch.sc.top;
+    var X = function (h) { return L + pw * h / 24; }, Y = function (v) { return T + ph * (1 - v / top); };
+    ch.geom = { L: L, pw: pw };
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.fillStyle = c('--muted'); ctx.strokeStyle = c('--line'); ctx.lineWidth = 1;
+    ch.sc.ticks.forEach(function (v) {
+      ctx.beginPath(); ctx.moveTo(L, Y(v) + .5); ctx.lineTo(w - R, Y(v) + .5); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmt(v, 0), L - 6, Y(v));
+    });
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, 6, 12, 18, 24].forEach(function (h) { ctx.fillText(h + 'h', X(h), hgt - B + 6); });
+    if (ch.prev) {
+      ctx.strokeStyle = c('--grid'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.6; ctx.beginPath();
+      for (var k = 0; k <= 240; k++) { var hh = k / 10; k ? ctx.lineTo(X(hh), Y(ch.prev(hh))) : ctx.moveTo(X(hh), Y(ch.prev(hh))); }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    var cu = c('--copper');
+    ctx.beginPath(); ctx.moveTo(X(data[0][0]), Y(0));
+    data.forEach(function (p) { ctx.lineTo(X(p[0]), Y(p[1])); });
+    ctx.lineTo(X(data[data.length - 1][0]), Y(0)); ctx.closePath();
+    ctx.globalAlpha = .16; ctx.fillStyle = cu; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.beginPath(); data.forEach(function (p, j) { j ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])); });
+    ctx.strokeStyle = cu; ctx.lineWidth = 2; ctx.stroke();
+    if (ch.hover !== null) {
+      var p = data[ch.hover];
+      ctx.strokeStyle = c('--muted'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(p[0]) + .5, T); ctx.lineTo(X(p[0]) + .5, T + ph); ctx.stroke();
+      if (ch.prev) { ctx.fillStyle = c('--grid'); ctx.beginPath(); ctx.arc(X(p[0]), Y(ch.prev(p[0])), 3.5, 0, 7); ctx.fill(); }
+      ctx.fillStyle = cu; ctx.beginPath(); ctx.arc(X(p[0]), Y(p[1]), 4, 0, 7); ctx.fill();
+    } else {
+      var pk = data.reduce(function (a, b) { return b[1] > a[1] ? b : a; });
+      ctx.fillStyle = cu; ctx.beginPath(); ctx.arc(X(pk[0]), Y(pk[1]), 3.5, 0, 7); ctx.fill();
+      ctx.fillStyle = c('--fg'); ctx.textAlign = X(pk[0]) > w * .6 ? 'right' : 'left'; ctx.textBaseline = 'top';
+      ctx.fillText('pico ' + fmt(pk[1], 1) + ' MW', X(pk[0]) + (ctx.textAlign === 'right' ? -8 : 8), Y(pk[1]) - 2);
+    }
+  }
+  function draw() { charts.forEach(drawChart); if (typeof drawCoff === 'function') drawCoff(); if (typeof drawPv === 'function') drawPv(); }
+  function setReadout(ch) {
+    var passo = ch.data.length > 1 ? ch.data[1][0] - ch.data[0][0] : 1;
+    if (ch.hover === null) {
+      var e = ch.data.reduce(function (a, p) { return a + p[1] * passo; }, 0);
+      ch.out.textContent = 'Energia no dia: ' + fmt(e, 0) + ' MWh · clique para abrir no SCADA';
+      return;
+    }
+    var p = ch.data[ch.hover];
+    if (!ch.prev) { ch.out.textContent = hhmm(p[0]) + ' · gerado ' + fmt(p[1], 1) + ' MW (média da hora)'; return; }
+    var pv = ch.prev(p[0]), err = pv > 0.5 ? (p[1] - pv) / pv * 100 : null;
+    ch.out.textContent = hhmm(p[0]) + ' · medido ' + fmt(p[1], 1) + ' MW · previsto ' + fmt(pv, 1) + ' MW' + (err === null ? '' : ' · desvio ' + (err > 0 ? '+' : '') + fmt(err, 0) + '%');
+  }
+  function pontoMaisProximo(data, h) {
+    var best = 0;
+    for (var i = 1; i < data.length; i++) if (Math.abs(data[i][0] - h) < Math.abs(data[best][0] - h)) best = i;
+    return best;
+  }
+  function goScada(s) {
+    var b = document.getElementById(s === 'solar' ? 'sc-solar' : 'sc-eol');
+    if (b) b.click();
+    document.getElementById('scada').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  }
+  charts.forEach(function (ch) {
+    function onMove(ev) {
+      if (!ch.geom) return;
+      var r = ch.cv.getBoundingClientRect(), x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+      ch.hover = pontoMaisProximo(ch.data, clamp((x - ch.geom.L) / ch.geom.pw * 24, 0, 24));
+      drawChart(ch); setReadout(ch);
+    }
+    ch.cv.addEventListener('mousemove', onMove);
+    ch.cv.addEventListener('touchmove', onMove, { passive: true });
+    ch.cv.addEventListener('mouseleave', function () { ch.hover = null; drawChart(ch); setReadout(ch); });
+    ch.cv.addEventListener('click', function () { goScada(ch.s); });
+    ch.cv.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goScada(ch.s); } });
+    setReadout(ch);
+  });
+  document.querySelectorAll('[data-go]').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); goScada(a.dataset.go); });
+  });
+  window.addEventListener('resize', draw);
+  // compatível com Safari antigo (iOS 13 ou anterior usa addListener)
+  try {
+    var mq = window.matchMedia && matchMedia('(prefers-color-scheme: dark)');
+    if (mq) { if (mq.addEventListener) mq.addEventListener('change', draw); else if (mq.addListener) mq.addListener(draw); }
+  } catch (e) {}
+  window.addEventListener('load', draw);
+  window.addEventListener('orientationchange', function () { setTimeout(draw, 300); });
+  if (window.ResizeObserver) { var ro = new ResizeObserver(function () { draw(); }); document.querySelectorAll('canvas').forEach(function (c) { ro.observe(c); }); }
+  apply(mode);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+
+  // ---------- SCADA simulado ----------
+  var box = document.getElementById('scada-box');
+  var unitsEl = document.getElementById('sc-units'), kpisEl = document.getElementById('sc-kpis');
+  var tagsEl = document.getElementById('sc-tags'), evEl = document.getElementById('sc-events');
+  var plant = 'solar', sel = 0, running = !reduce, timer = null;
+  var events = { solar: [], eol: [] };
+  function now() { return new Date().toLocaleTimeString('pt-BR', { hour12: false }); }
+  function logEv(p, txt, warn) { events[p].unshift({ t: now(), txt: txt, warn: !!warn }); events[p] = events[p].slice(0, 6); }
+
+  // usina solar: 8 inversores de 4,375 MW
+  var S = { G: 870, Tamb: 29, inv: [] };
+  for (var i = 0; i < 8; i++) S.inv.push({ id: 'INV-0' + (i + 1), eff: 0.975 + Math.random() * 0.015, T: 44 + Math.random() * 6, hot: false, p: 0 });
+  // parque eólico: 6 aerogeradores de 4,2 MW (WTG-05 em manutenção)
+  var E = { v0: 9.8, dir: 112, wtg: [], limite: null, restrito: 0, disp: 0 };
+  for (var j = 0; j < 6; j++) E.wtg.push({ id: 'WTG-0' + (j + 1), off: (j - 2.5) * 0.35, v: 0, p: 0, rpm: 0, pitch: 0, rated: false, man: j === 4 });
+  function curvaPotencia(v) { // curva de potência típica: partida 3 m/s, nominal 12 m/s, corte 25 m/s
+    if (v < 3 || v >= 25) return 0;
+    if (v >= 12) return 4.2;
+    return 4.2 * Math.pow((v - 3) / 9, 2.6);
+  }
+  function step() {
+    S.G = clamp(S.G + rnd(25), 640, 1010);
+    var Tmod = S.Tamb + S.G * 0.026;
+    S.inv.forEach(function (u, k) {
+      u.T = clamp(u.T + rnd(1.2) + (k === 2 ? 0.25 : 0) - (u.T > 62 ? 1.5 : 0), 38, 66);
+      var derate = u.T > 60 ? 0.85 : 1;
+      u.p = 4.375 * S.G / 1000 * (1 - 0.004 * (Tmod - 25)) * u.eff * derate;
+      u.vdc = 1180 + rnd(25); u.q = rnd(0.15);
+      var hot = u.T > 60;
+      if (hot && !u.hot) logEv('solar', u.id + ' temperatura alta (' + fmt(u.T, 0) + ' °C), limitação de potência', true);
+      if (!hot && u.hot) logEv('solar', u.id + ' temperatura normalizada');
+      u.hot = hot;
+    });
+    S.Tmod = Tmod;
+    E.v0 = clamp(E.v0 + rnd(0.45), 6.5, 14.5); E.dir = (E.dir + rnd(2) + 360) % 360;
+    E.wtg.forEach(function (u) {
+      if (u.man) { u.v = clamp(E.v0 + u.off + rnd(0.3), 0, 30); u.p = 0; u.pDisp = 0; u.rpm = 0; u.pitch = 88; return; }
+      u.v = clamp(E.v0 + u.off + rnd(0.6), 0, 30);
+      u.p = curvaPotencia(u.v) * (0.98 + Math.random() * 0.02);
+      u.rpm = u.p > 0 ? clamp(5 + u.v * 0.85, 5, 14.8) : 0;
+      u.pitch = u.v > 12 ? (u.v - 12) * 2.4 : 0.5;
+      var rated = u.v >= 12;
+      if (rated && !u.rated) logEv('eol', u.id + ' em potência nominal, controle de pitch atuando');
+      if (!rated && u.rated) logEv('eol', u.id + ' abaixo da nominal (' + fmt(u.v, 1) + ' m/s)');
+      u.rated = rated;
+      u.pDisp = u.p;
+    });
+    // ordem de restrição do ONS: limita a potência total do parque e redistribui entre as máquinas
+    var disp = E.wtg.reduce(function (a, u) { return a + u.pDisp; }, 0);
+    E.disp = disp; E.restrito = 0;
+    if (E.limite !== null && disp > E.limite) {
+      var fr = E.limite / disp;
+      E.wtg.forEach(function (u) { if (!u.man) { u.p = u.pDisp * fr; u.pitch += (1 - fr) * 14; u.lim = true; } });
+      E.restrito = disp - E.limite;
+    } else E.wtg.forEach(function (u) { u.lim = false; });
+  }
+  function kpi(v, l) { return '<div class="kpi"><b>' + v + '</b><span>' + l + '</span></div>'; }
+  function render() {
+    document.getElementById('sc-clock').textContent = now();
+    var html = '', ptot;
+    if (plant === 'solar') {
+      ptot = S.inv.reduce(function (a, u) { return a + u.p; }, 0);
+      var ok = S.inv.filter(function (u) { return !u.hot; }).length;
+      kpisEl.innerHTML = kpi(fmt(ptot, 1) + ' MW', 'potência ativa') + kpi(fmt(S.G, 0), 'irradiância W/m²') + kpi(fmt(S.Tmod, 1) + ' °C', 'temperatura do módulo') + kpi(fmt(ok / 8 * 100, 0) + '%', 'inversores sem restrição');
+      S.inv.forEach(function (u, k) {
+        html += '<button type="button" class="unit" data-i="' + k + '" aria-pressed="' + (k === sel) + '"><span class="u-name">' + u.id + '<span class="dot' + (u.hot ? ' warn' : '') + '"></span></span>' +
+          '<span class="u-val">' + fmt(u.p, 2) + '<small>MW</small></span><span class="bar"><i style="width:' + (u.p / 4.375 * 100).toFixed(0) + '%"></i></span>' +
+          '<span class="u-sub">' + fmt(u.T, 0) + ' °C</span></button>';
+      });
+    } else {
+      ptot = E.wtg.reduce(function (a, u) { return a + u.p; }, 0);
+      var vm = E.wtg.reduce(function (a, u) { return a + u.v; }, 0) / 6, disp = E.wtg.filter(function (u) { return !u.man; }).length;
+      kpisEl.innerHTML = kpi(fmt(ptot, 1) + ' MW', 'potência ativa') + kpi(fmt(vm, 1) + ' m/s', 'vento médio (nacele)') + (E.limite !== null ? kpi(fmt(E.restrito, 1) + ' MW', 'restringido pelo ONS agora') : kpi(fmt(ptot / 25.2 * 100, 0) + '%', 'fator de capacidade agora')) + kpi(fmt(disp / 6 * 100, 0) + '%', 'disponibilidade');
+      E.wtg.forEach(function (u, k) {
+        html += '<button type="button" class="unit" data-i="' + k + '" aria-pressed="' + (k === sel) + '"><span class="u-name">' + u.id + '<span class="dot' + (u.man ? ' off' : '') + '"></span></span>' +
+          '<span class="u-val">' + (u.man ? 'MAN' : fmt(u.p, 2) + '<small>MW</small>') + '</span><span class="bar"><i style="width:' + (u.p / 4.2 * 100).toFixed(0) + '%"></i></span>' +
+          '<span class="u-sub">' + fmt(u.v, 1) + ' m/s · ' + fmt(u.rpm, 1) + ' rpm</span></button>';
+      });
+    }
+    unitsEl.innerHTML = html;
+    var rows = [], pre;
+    if (plant === 'solar') {
+      var u = S.inv[sel]; pre = 'UFV01.' + u.id.replace('-', '');
+      document.getElementById('sc-unit-title').textContent = 'Tags · ' + u.id;
+      rows = [['P_ATIVA', fmt(u.p, 3), 'MW'], ['P_REATIVA', fmt(u.q, 3), 'Mvar'], ['V_CC', fmt(u.vdc, 0), 'V'], ['T_INTERNA', fmt(u.T, 1), '°C'], ['IRRAD_POA', fmt(S.G, 0), 'W/m²'], ['ESTADO', u.hot ? 'LIMITADO' : 'OPERANDO', '']];
+    } else {
+      var t = E.wtg[sel]; pre = 'EOL01.' + t.id.replace('-', '');
+      document.getElementById('sc-unit-title').textContent = 'Tags · ' + t.id;
+      rows = [['P_ATIVA', fmt(t.p, 3), 'MW'], ['P_DISPONIVEL', fmt(t.pDisp || 0, 3), 'MW'], ['VENTO', fmt(t.v, 1), 'm/s'], ['ROTOR', fmt(t.rpm, 1), 'rpm'], ['PITCH', fmt(t.pitch, 1), '°'], ['YAW_DIR', fmt(E.dir, 0), '°'], ['ESTADO', t.man ? 'MANUTENÇÃO' : t.lim ? 'LIMITADO ONS' : t.rated ? 'NOMINAL' : 'OPERANDO', '']];
+    }
+    tagsEl.innerHTML = rows.map(function (r) {
+      return '<tr><td>' + pre + '.' + r[0] + '</td><td class="num">' + r[1] + '</td><td>' + r[2] + '</td><td class="q">GOOD</td></tr>';
+    }).join('');
+    evEl.innerHTML = events[plant].map(function (e) {
+      return '<li><span class="t">' + e.t + '</span><span' + (e.warn ? ' class="w"' : '') + '>' + e.txt + '</span></li>';
+    }).join('') || '<li><span class="t">--</span><span>Sem eventos.</span></li>';
+  }
+  unitsEl.addEventListener('click', function (ev) {
+    var b = ev.target.closest('.unit'); if (!b) return;
+    sel = +b.dataset.i; render();
+    var nb = unitsEl.querySelector('[data-i="' + sel + '"]'); if (nb) nb.focus();
+  });
+  document.querySelectorAll('#scada-box .seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      plant = b.dataset.p; sel = 0;
+      document.querySelectorAll('#scada-box .seg button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      document.getElementById('sc-name').textContent = plant === 'solar' ? 'UFV Exemplo · 35 MWp' : 'EOL Exemplo · 6 × 4,2 MW';
+      coffBtn.hidden = plant !== 'eol';
+      render();
+    });
+  });
+  var coffBtn = document.getElementById('sc-coff');
+  coffBtn.addEventListener('click', function () {
+    var on = E.limite === null;
+    E.limite = on ? Math.max(3, Math.round(E.disp * 0.5)) : null;
+    coffBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    coffBtn.textContent = on ? 'Liberar restrição' : 'Simular ordem do ONS';
+    logEv('eol', on ? 'ONS: ordem de restrição, parque limitado a ' + E.limite + ' MW (razão elétrica)' : 'ONS: restrição encerrada, parque liberado', on);
+    step(); render();
+  });
+  var pauseBtn = document.getElementById('sc-pause');
+  function setRun(on) {
+    running = on; box.classList.toggle('running', on);
+    pauseBtn.textContent = on ? 'Pausar' : 'Retomar';
+    clearInterval(timer);
+    if (on) timer = setInterval(function () { if (!document.hidden) { step(); render(); } }, 1500);
+  }
+  pauseBtn.addEventListener('click', function () { setRun(!running); });
+  logEv('solar', 'Comunicação com 8 inversores OK');
+  logEv('eol', 'WTG-05 em manutenção programada (troca de rolamento do pitch)', true);
+  logEv('eol', 'Comunicação com 6 aerogeradores OK');
+  for (var w = 0; w < 4; w++) step();
+  render(); setRun(running);
+
+  // ---------- constrained-off: ilustrativo até o pipeline publicar data/ons.json ----------
+  var coffCv = document.getElementById('coff-chart'), coffOut = document.getElementById('coff-readout');
+  var coffData = [], coffHover = null, coffGeom = null, coffReal = false, coffSc = escala(120), coffPasso = 0.5;
+  function coffKpis(eg, er, hr) {
+    document.getElementById('coff-kpis').innerHTML =
+      kpi(fmt(eg, 0) + ' MWh', 'energia gerada no dia') + kpi(fmt(er, 0) + ' MWh', 'energia restringida') +
+      kpi(fmt(eg + er > 0 ? er / (eg + er) * 100 : 0, 1) + '%', 'perda por restrição') + kpi(fmt(hr, 1) + ' h', 'tempo sob restrição');
+  }
+  function coffCalcular() {
+    var eg = 0, er = 0, hr = 0, max = 0;
+    coffData.forEach(function (p) {
+      eg += p.gen * coffPasso; max = Math.max(max, p.ref, p.gen);
+      if (p.lim) { er += Math.max(p.ref - p.gen, 0) * coffPasso; hr += coffPasso; }
+    });
+    coffSc = escala(max); coffKpis(eg, er, hr);
+  }
+  (function () { // dia ilustrativo: ordem do ONS das 9h30 às 16h com limite de 40 MW
+    for (var i = 0; i < 48; i++) {
+      var h = i / 2;
+      var ref = clamp(70 + 28 * Math.cos(2 * Math.PI * (h - 15) / 24) + 7 * Math.sin(i * 0.8) + 4 * Math.sin(i * 2.1), 0, 118);
+      var lim = h >= 9.5 && h <= 16;
+      var gen = lim ? Math.min(ref, 40 + 1.5 * Math.sin(i * 1.7)) : ref * (0.985 + 0.01 * Math.sin(i));
+      coffData.push({ h: h, ref: ref, gen: Math.max(0, gen), lim: lim });
+    }
+    coffCalcular();
+  })();
+  function drawCoff() {
+    if (!coffCv || !coffData || !coffData.length) return;
+    var css = getComputedStyle(root), c = function (n) { return css.getPropertyValue(n).trim(); };
+    var w = coffCv.clientWidth, hgt = coffCv.clientHeight, dpr = window.devicePixelRatio || 1;
+    if (!w) return;
+    coffCv.width = w * dpr; coffCv.height = hgt * dpr;
+    var ctx = coffCv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, hgt);
+    var L = 42, R = 16, T = 8, B = 24, pw = w - L - R, ph = hgt - T - B, top = coffSc.top;
+    var X = function (h) { return L + pw * h / 24; }, Y = function (v) { return T + ph * (1 - v / top); };
+    coffGeom = { L: L, pw: pw };
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.fillStyle = c('--muted'); ctx.strokeStyle = c('--line'); ctx.lineWidth = 1;
+    coffSc.ticks.forEach(function (v) {
+      ctx.beginPath(); ctx.moveTo(L, Y(v) + .5); ctx.lineTo(w - R, Y(v) + .5); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmt(v, 0), L - 6, Y(v));
+    });
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, 6, 12, 18, 24].forEach(function (h) { ctx.fillText(h + 'h', X(h), hgt - B + 6); });
+    // faixas e áreas dos trechos com restrição (pode haver mais de um no dia)
+    var trechos = [], atual = null;
+    coffData.forEach(function (p) {
+      if (p.lim) { if (!atual) { atual = []; trechos.push(atual); } atual.push(p); } else atual = null;
+    });
+    trechos.forEach(function (tr, ti) {
+      var x0 = X(tr[0].h), x1 = X(Math.min(24, tr[tr.length - 1].h + coffPasso));
+      ctx.globalAlpha = .07; ctx.fillStyle = c('--todo'); ctx.fillRect(x0, T, x1 - x0, ph); ctx.globalAlpha = 1;
+      if (ti === 0) {
+        ctx.fillStyle = c('--todo'); ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+        ctx.fillText(coffReal ? 'restrição de operação (ONS)' : 'ordem do ONS: limite 40 MW', x0 + 6, T + 4);
+      }
+      ctx.beginPath();
+      tr.forEach(function (p, j) { j ? ctx.lineTo(X(p.h), Y(p.ref)) : ctx.moveTo(X(p.h), Y(p.ref)); });
+      for (var k = tr.length - 1; k >= 0; k--) ctx.lineTo(X(tr[k].h), Y(tr[k].gen));
+      ctx.closePath(); ctx.globalAlpha = .42; ctx.fillStyle = c('--todo'); ctx.fill(); ctx.globalAlpha = 1;
+    });
+    ctx.strokeStyle = c('--grid'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.6; ctx.beginPath();
+    coffData.forEach(function (p, j) { j ? ctx.lineTo(X(p.h), Y(p.ref)) : ctx.moveTo(X(p.h), Y(p.ref)); });
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle = c('--copper'); ctx.lineWidth = 2; ctx.beginPath();
+    coffData.forEach(function (p, j) { j ? ctx.lineTo(X(p.h), Y(p.gen)) : ctx.moveTo(X(p.h), Y(p.gen)); });
+    ctx.stroke();
+    if (coffHover !== null) {
+      var p = coffData[coffHover];
+      ctx.strokeStyle = c('--muted'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(p.h) + .5, T); ctx.lineTo(X(p.h) + .5, T + ph); ctx.stroke();
+      ctx.fillStyle = c('--grid'); ctx.beginPath(); ctx.arc(X(p.h), Y(p.ref), 3.5, 0, 7); ctx.fill();
+      ctx.fillStyle = c('--copper'); ctx.beginPath(); ctx.arc(X(p.h), Y(p.gen), 4, 0, 7); ctx.fill();
+    }
+  }
+  function coffReadout() {
+    if (coffHover === null) { coffOut.textContent = 'Passe o mouse ou toque no gráfico para ler cada meia hora.'; return; }
+    var p = coffData[coffHover], perda = Math.max(p.ref - p.gen, 0);
+    coffOut.textContent = hhmm(p.h) + ' · referência ' + fmt(p.ref, 1) + ' MW · verificada ' + fmt(p.gen, 1) + ' MW' +
+      (p.lim ? ' · restringido ' + fmt(perda, 1) + ' MW' : ' · sem restrição');
+  }
+  function coffMove(ev) {
+    if (!coffGeom) return;
+    var r = coffCv.getBoundingClientRect(), x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    var h = clamp((x - coffGeom.L) / coffGeom.pw * 24, 0, 24), best = 0;
+    for (var i = 1; i < coffData.length; i++) if (Math.abs(coffData[i].h - h) < Math.abs(coffData[best].h - h)) best = i;
+    coffHover = best; drawCoff(); coffReadout();
+  }
+  coffCv.addEventListener('mousemove', coffMove);
+  coffCv.addEventListener('touchmove', coffMove, { passive: true });
+  coffCv.addEventListener('mouseleave', function () { coffHover = null; drawCoff(); coffReadout(); });
+  coffReadout(); drawCoff();
+
+  // ---------- dados reais do ONS (data/ons.json, publicado pelo pipeline no GitHub Actions) ----------
+  function dataBR(iso) { var p = String(iso).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso; }
+  function aplicarONS(d) {
+    if (!d) return;
+    var sufixo = function (o) { return (o.estado ? ' (' + o.estado + ')' : ''); };
+    [['solar', d.solar], ['eol', d.eolica]].forEach(function (par) {
+      var o = par[1], ch = charts.filter(function (c) { return c.s === par[0]; })[0];
+      if (!o || !ch || !o.horario || !o.horario.length) return;
+      ch.data = o.horario.map(function (p) { return [p[0], Math.max(0, p[1])]; });
+      ch.prev = null; ch.hover = null;
+      ch.sc = escala(Math.max.apply(null, ch.data.map(function (p) { return p[1]; })));
+      document.getElementById('name-' + par[0]).textContent = o.usina + sufixo(o);
+      document.getElementById('prev-' + par[0]).hidden = true;
+      document.getElementById('tag-' + par[0]).textContent = 'dados reais ONS · ' + dataBR(o.data);
+      setReadout(ch); drawChart(ch);
+    });
+    var r = d.restricao;
+    if (r && r.semi_horario && r.semi_horario.length) {
+      coffReal = true; coffHover = null;
+      coffPasso = r.semi_horario.length > 1 ? Math.max(0.25, r.semi_horario[1][0] - r.semi_horario[0][0]) : 0.5;
+      coffData = r.semi_horario.map(function (p) {
+        var gen = Math.max(0, p[1] || 0), ref = p[2] === null || p[2] === undefined ? gen : Math.max(0, p[2]);
+        return { h: p[0], gen: gen, ref: ref, lim: !!p[3] };
+      });
+      coffCalcular();
+      document.getElementById('coff-name').textContent = r.usina + sufixo(r);
+      document.getElementById('coff-tag').textContent = 'dados reais ONS · ' + dataBR(r.data);
+      coffReadout(); drawCoff();
+    }
+    var nota = document.getElementById('ons-nota');
+    if (nota && d.atualizado_em) { nota.hidden = false; nota.textContent = 'Curvas com dados reais do ONS (licença CC-BY 4.0), atualizadas automaticamente pelo pipeline em ' + dataBR(d.atualizado_em.slice(0, 10)) + '.'; }
+  }
+  try {
+    if (window.fetch && location.protocol !== 'file:') {
+      fetch('data/ons.json', { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(aplicarONS)
+        .catch(function () {});
+    }
+  } catch (e) {}
+
+  // ---------- previsão solar (IA): ilustrativa até o pipeline publicar data/previsao_solar.json ----------
+  var pvCv = document.getElementById('pv-chart'), pvOut = document.getElementById('pv-readout');
+  var pvPts = [], pvHover = null, pvGeom = null, pvSc = escala(120);
+  function pvKpis(nmae, ganho, eAmanha, horas) {
+    document.getElementById('pv-kpis').innerHTML =
+      kpi(fmt(nmae, 1) + '%', 'erro médio (nMAE)') + kpi((ganho === null ? '–' : fmt(ganho, 0) + '%'), 'menos erro que a persistência') +
+      kpi(fmt(eAmanha, 0) + ' MWh', 'geração prevista amanhã') + kpi(fmt(horas, 0), 'horas de treino');
+  }
+  (function () { // 3 dias ilustrativos + amanhã
+    var nuv = [0.15, 0.55, 0.1, 0.3], hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    for (var d = 0; d < 4; d++) {
+      for (var h = 0; h < 24; h++) {
+        var clear = (h < 6 || h > 18) ? 0 : Math.pow(Math.sin(Math.PI * (h - 6) / 12.5), 1.3);
+        var c = nuv[d] + 0.12 * Math.sin(h * 1.3 + d);
+        var prev = 110 * clear * (1 - 0.7 * clamp(c, 0, 1));
+        var real = d < 3 ? Math.max(0, prev * (0.94 + 0.1 * Math.sin(h * 2.1 + d * 3))) : null;
+        var t = new Date(hoje.getTime() + (d - 3 + 1) * 864e5 + h * 36e5);
+        pvPts.push({ t: t, real: real, prev: prev, fut: d === 3, ghi: Math.round(1000 * clear * (1 - 0.75 * clamp(c, 0, 1))) });
+      }
+    }
+    pvSc = escala(110);
+    var futE = pvPts.filter(function (p) { return p.fut; }).reduce(function (a, p) { return a + p.prev; }, 0);
+    pvKpis(4.2, 58, futE, 2160);
+  })();
+  function drawPv() {
+    if (!pvCv || !pvPts || !pvPts.length) return;
+    var css = getComputedStyle(root), c = function (n) { return css.getPropertyValue(n).trim(); };
+    var w = pvCv.clientWidth, hgt = pvCv.clientHeight, dpr = window.devicePixelRatio || 1;
+    if (!w) return;
+    pvCv.width = w * dpr; pvCv.height = hgt * dpr;
+    var ctx = pvCv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, hgt);
+    var L = 42, R = 16, T = 8, B = 24, pw = w - L - R, ph = hgt - T - B, n = pvPts.length, top = pvSc.top;
+    var X = function (i) { return L + pw * i / (n - 1); }, Y = function (v) { return T + ph * (1 - v / top); };
+    pvGeom = { L: L, pw: pw, n: n };
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.fillStyle = c('--muted'); ctx.strokeStyle = c('--line'); ctx.lineWidth = 1;
+    pvSc.ticks.forEach(function (v) {
+      ctx.beginPath(); ctx.moveTo(L, Y(v) + .5); ctx.lineTo(w - R, Y(v) + .5); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmt(v, 0), L - 6, Y(v));
+    });
+    // rótulos dos dias e divisória de amanhã
+    ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+    var iFut = -1;
+    pvPts.forEach(function (p, i) {
+      if (p.t.getHours() === 12) ctx.fillText(p.fut ? 'amanhã' : dois(p.t.getDate()) + '/' + dois(p.t.getMonth() + 1), X(i), hgt - B + 6);
+      if (p.fut && iFut < 0) iFut = i;
+    });
+    if (iFut > 0) {
+      ctx.globalAlpha = .08; ctx.fillStyle = c('--todo'); ctx.fillRect(X(iFut), T, X(n - 1) - X(iFut), ph); ctx.globalAlpha = 1;
+      ctx.strokeStyle = c('--todo'); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(X(iFut) + .5, T); ctx.lineTo(X(iFut) + .5, T + ph); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // real
+    var cu = c('--copper');
+    ctx.strokeStyle = cu; ctx.lineWidth = 2; ctx.beginPath(); var on = false;
+    pvPts.forEach(function (p, i) { if (p.real === null) { on = false; return; } on ? ctx.lineTo(X(i), Y(p.real)) : ctx.moveTo(X(i), Y(p.real)); on = true; });
+    ctx.stroke();
+    // previsto (passado tracejado, amanhã com área)
+    ctx.strokeStyle = c('--grid'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.6; ctx.beginPath(); on = false;
+    pvPts.forEach(function (p, i) { if (p.fut) return; on ? ctx.lineTo(X(i), Y(p.prev)) : ctx.moveTo(X(i), Y(p.prev)); on = true; });
+    ctx.stroke(); ctx.setLineDash([]);
+    if (iFut > 0) {
+      ctx.beginPath(); ctx.moveTo(X(iFut), Y(0));
+      for (var i = iFut; i < n; i++) ctx.lineTo(X(i), Y(pvPts[i].prev));
+      ctx.lineTo(X(n - 1), Y(0)); ctx.closePath();
+      ctx.globalAlpha = .38; ctx.fillStyle = c('--todo'); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.strokeStyle = c('--grid'); ctx.lineWidth = 2; ctx.beginPath();
+      for (var k = iFut; k < n; k++) k === iFut ? ctx.moveTo(X(k), Y(pvPts[k].prev)) : ctx.lineTo(X(k), Y(pvPts[k].prev));
+      ctx.stroke();
+    }
+    if (pvHover !== null) {
+      var p = pvPts[pvHover];
+      ctx.strokeStyle = c('--muted'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(pvHover) + .5, T); ctx.lineTo(X(pvHover) + .5, T + ph); ctx.stroke();
+      ctx.fillStyle = c('--grid'); ctx.beginPath(); ctx.arc(X(pvHover), Y(p.prev), 3.5, 0, 7); ctx.fill();
+      if (p.real !== null) { ctx.fillStyle = cu; ctx.beginPath(); ctx.arc(X(pvHover), Y(p.real), 4, 0, 7); ctx.fill(); }
+    }
+  }
+  function pvReadout() {
+    if (pvHover === null) { pvOut.textContent = 'Passe o mouse ou toque no gráfico para ver cada hora.'; return; }
+    var p = pvPts[pvHover], quando = (p.fut ? 'amanhã ' : dois(p.t.getDate()) + '/' + dois(p.t.getMonth() + 1) + ' ') + dois(p.t.getHours()) + 'h';
+    pvOut.textContent = p.fut
+      ? quando + ' · previsto ' + fmt(p.prev, 1) + ' MW' + (p.ghi !== undefined ? ' · irradiância prevista ' + fmt(p.ghi, 0) + ' W/m²' : '')
+      : quando + ' · real ' + fmt(p.real, 1) + ' MW · previsto ' + fmt(p.prev, 1) + ' MW · erro ' + fmt(p.prev - p.real, 1) + ' MW';
+  }
+  function pvMove(ev) {
+    if (!pvGeom) return;
+    var r = pvCv.getBoundingClientRect(), x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    pvHover = clamp(Math.round((x - pvGeom.L) / pvGeom.pw * (pvGeom.n - 1)), 0, pvGeom.n - 1);
+    drawPv(); pvReadout();
+  }
+  pvCv.addEventListener('mousemove', pvMove);
+  pvCv.addEventListener('touchmove', pvMove, { passive: true });
+  pvCv.addEventListener('mouseleave', function () { pvHover = null; drawPv(); pvReadout(); });
+  pvReadout(); drawPv();
+
+  function lerHora(iso) { // "2026-10-19T13:00" -> Date local
+    var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2})/.exec(iso);
+    return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4]) : new Date(iso);
+  }
+  function aplicarPrevisao(d) {
+    if (!d || d.erro || !d.amanha || !d.backtest || !d.backtest.length) return;
+    var bt = d.backtest, ultDias = [];
+    bt.forEach(function (p) { var dia = p[0].slice(0, 10); if (ultDias.indexOf(dia) < 0) ultDias.push(dia); });
+    var manter = ultDias.slice(-3);
+    var pts = bt.filter(function (p) { return manter.indexOf(p[0].slice(0, 10)) >= 0; })
+      .map(function (p) { return { t: lerHora(p[0]), real: Math.max(0, p[1]), prev: Math.max(0, p[2]), fut: false }; });
+    d.amanha.horario.forEach(function (p) { pts.push({ t: lerHora(p[0]), real: null, prev: Math.max(0, p[1]), fut: true, ghi: p[2] }); });
+    pvPts = pts; pvHover = null;
+    pvSc = escala(Math.max.apply(null, pts.map(function (p) { return Math.max(p.prev, p.real || 0); })));
+    var m = d.metricas || {};
+    pvKpis(m.modelo ? m.modelo.nmae_pct : 0, m.ganho_sobre_persistencia_pct === undefined ? null : m.ganho_sobre_persistencia_pct,
+           d.amanha.energia_mwh, d.horas_treino || 0);
+    document.getElementById('pv-name').textContent = d.usina + (d.estado ? ' (' + d.estado + ')' : '');
+    document.getElementById('pv-tag').textContent = 'dados reais ONS + Open-Meteo · previsão para ' + dataBR(d.amanha.data);
+    pvReadout(); drawPv();
+  }
+  try {
+    if (window.fetch && location.protocol !== 'file:') {
+      fetch('data/previsao_solar.json', { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(aplicarPrevisao)
+        .catch(function () {});
+    }
+  } catch (e) {}
+
+  // ---------- arquitetura interativa ----------
+  var INFO = {
+    fonte_b: ['Fonte', 'Fonte batch', 'Arquivos CSV de vendas das lojas físicas e o cadastro de lojas, na pasta raw do Azure Data Lake Gen2.'],
+    fonte_s: ['Fonte', 'Fonte em tempo real', 'Eventos de pedidos do e-commerce chegando continuamente ao Data Lake.'],
+    ing_b: ['Ingestão', 'Ingestão batch', 'Notebook no Databricks lê os arquivos brutos e grava em Delta, com colunas de auditoria (arquivo de origem e horário de ingestão).'],
+    ing_s: ['Ingestão', 'Ingestão streaming', 'Spark Structured Streaming com checkpoint, processando os eventos assim que chegam.'],
+    bronze_b: ['Camada Bronze', 'Bronze batch', 'Cópia fiel da fonte em Delta, sem regras de negócio. 375 mil vendas físicas.'],
+    silver_b: ['Camada Silver', 'Silver batch', '5 regras técnicas: id_transacao em UUID e sem duplicatas, loja existente no cadastro, valor maior que zero, pagamento em Cartão/Dinheiro/Pix e partição por ano e mês. Rejeitados vão para a quarentena com o motivo.'],
+    gold_b: ['Camada Gold', 'Gold batch', '6 tabelas de KPIs gravadas com MERGE (upsert): receita por loja com variação MoM, ticket médio, % de CPF identificado, caixas sobrecarregados, vendas em feriados e dimensão de lojas.'],
+    bronze_s: ['Camada Bronze', 'Bronze streaming', 'Eventos brutos gravados em Delta exatamente como chegaram.'],
+    silver_s: ['Camada Silver', 'Silver streaming', 'Checagens em tempo real: completude, tipos de dados, faixas de valor e desvio de volume por hora. Eventos inválidos vão para a quarentena.'],
+    gold_s: ['Camada Gold', 'Gold em tempo real', 'GMV em janelas de 1h, 6h e 24h, top 10 SKUs e alertas de desconto acima de 40% e de queda de volume.'],
+    sql: ['Data warehouse', 'SQL Server', 'Tabelas Gold sincronizadas a cada execução, com o mesmo conteúdo da Delta depois do MERGE. É a fonte do Looker.'],
+    looker: ['Consumo', 'Looker', 'Dashboards de receita, ticket médio, fidelização (CPF) e operação de caixas para as 30 lojas.'],
+    orch: ['Orquestração', 'GitHub e Databricks Jobs', 'Código versionado no GitHub. O Databricks Jobs agenda ingestão, Silver, Gold e publicação em sequência.']
+  };
+  var nodes = document.querySelectorAll('.node');
+  var logEl = document.getElementById('arch-log'), runBtn = document.getElementById('arch-run');
+  function show(k) {
+    var d = INFO[k];
+    document.getElementById('arch-k').textContent = d[0];
+    document.getElementById('arch-t').textContent = d[1];
+    document.getElementById('arch-d').textContent = d[2];
+    nodes.forEach(function (n) { n.classList.toggle('sel', n.dataset.k === k); });
+  }
+  nodes.forEach(function (n) {
+    n.addEventListener('click', function () { show(n.dataset.k); });
+    n.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(n.dataset.k); } });
+  });
+  var STEPS = [
+    ['orch', 'Databricks Jobs: execução iniciada'],
+    ['fonte_b', 'raw/batch-data: arquivo de vendas encontrado'],
+    ['ing_b', 'Ingestão concluída, colunas de auditoria adicionadas'],
+    ['bronze_b', 'Bronze: 375.000 linhas'],
+    ['silver_b', 'Silver: 375.000 válidas · 0 na quarentena · conferência OK'],
+    ['gold_b', 'Gold: 6 tabelas atualizadas com MERGE'],
+    ['sql', 'SQL Server: 6 tabelas sincronizadas'],
+    ['looker', 'Looker: dashboards prontos com os dados novos']
+  ];
+  var busy = false;
+  runBtn.addEventListener('click', function () {
+    if (busy) return; busy = true; runBtn.disabled = true;
+    logEl.innerHTML = '';
+    nodes.forEach(function (n) { n.classList.remove('done', 'active', 'sel'); });
+    document.querySelectorAll('.d-flow.fb').forEach(function (f) { f.classList.add('run'); });
+    var i = 0, delay = reduce ? 150 : 650;
+    (function next() {
+      if (i > 0) { var prevN = document.querySelector('.node[data-k="' + STEPS[i - 1][0] + '"]'); prevN.classList.remove('active'); prevN.classList.add('done'); }
+      if (i === STEPS.length) {
+        document.querySelectorAll('.d-flow.fb').forEach(function (f) { f.classList.remove('run'); });
+        var li = document.createElement('li'); li.textContent = 'Execução concluída com sucesso'; logEl.appendChild(li);
+        busy = false; runBtn.disabled = false; runBtn.textContent = 'Executar de novo';
+        return;
+      }
+      var s = STEPS[i], n = document.querySelector('.node[data-k="' + s[0] + '"]');
+      n.classList.add('active'); show(s[0]); n.classList.remove('sel');
+      var item = document.createElement('li'); item.textContent = s[1]; logEl.appendChild(item);
+      i++; setTimeout(next, delay);
+    })();
+  });
+})();
+</script>
+</body>
+</html>

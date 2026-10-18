@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: gold_matriz_mensal
+    description: "Energia por fonte e participação na matriz, por mês."
+    columns:
+      - name: participacao_pct
+        tests: [not_null]
+  - name: gold_geracao_diaria_usina
+    description: "Energia diária por usina solar e eólica."
+  - name: gold_perfil_horario
+    description: "MW médio por hora do dia, por fonte e estado (inclui BRASIL)."
+  - name: gold_restricao_eolica_mensal
+    description: "Energia eólica restringida por usina e mês."
