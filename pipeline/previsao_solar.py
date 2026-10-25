@@ -1,7 +1,7 @@
 """
 IA: previsão de geração solar hora a hora para o dia seguinte.
 
-1. Usa a usina solar fixa do portfólio (pipeline/usinas.py: Complexo Solar São Gonçalo, PI), a mesma do
+1. Usa a usina solar fixa do portfólio (pipeline/usinas.py: Complexo Solar Janaúba, MG), a mesma do
    painel SCADA. Se ela não estiver nos dados, cai na maior usina solar física dos últimos 30 dias.
 2. Busca o tempo da região no Open-Meteo (gratuito, sem chave): irradiância global, direta e difusa,
    temperatura e nebulosidade, dos últimos ~90 dias e da previsão para amanhã.

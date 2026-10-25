@@ -2,8 +2,8 @@
 Escolha das usinas que o site mostra (curvas do topo, SCADA e previsão solar).
 
 Usinas fixas, para o portfólio contar sempre a mesma história e o visitante poder conferir no ONS:
-  - Solar:  Complexo Solar São Gonçalo (Enel · São Gonçalo do Gurguéia, PI · 864 MW)
-  - Eólica: Complexo Eólico Lagoa dos Ventos (Enel · Piauí)
+  - Solar:  Complexo Solar Janaúba (Elera Renováveis · Janaúba, MG · 27 usinas, 1,6 GWp)
+  - Eólica: Complexo Eólico Lagoa dos Ventos (Enel Green Power · Piauí)
 
 O ONS publica cada complexo em várias linhas (uma por usina ou conjunto). Somamos todas as séries cujo nome
 contém o padrão. Se o padrão não achar nada (o ONS mudou o nome, por exemplo), cai na escolha automática:
@@ -16,8 +16,10 @@ import os
 
 USINAS = {
     "SOLAR": {
-        "padrao": "SAO GONCALO", "nome": "Complexo Solar São Gonçalo", "dono": "Enel Green Power",
-        "estado": "PI", "lat": -10.03, "lon": -45.30, "capacidade_mw": 864.0,
+        # no ONS: "CONJUNTO FOTOVOLTAICO JANAUBA". Capacidade em MW (CA) vem do fator de capacidade do ONS;
+        # os 1,6 GWp divulgados são potência de pico dos módulos (CC), por isso não entram aqui.
+        "padrao": "JANAUBA", "nome": "Complexo Solar Janaúba", "dono": "Elera Renováveis",
+        "estado": "MG", "lat": -15.80, "lon": -43.31, "capacidade_mw": None,
     },
     "EOLICA": {
         "padrao": "LAGOA DOS VENTOS", "nome": "Complexo Eólico Lagoa dos Ventos", "dono": "Enel Green Power",
@@ -30,7 +32,7 @@ NOME_SQL = "strip_accents(upper(coalesce(usina, '')))"
 
 # Séries que não representam uma usina física:
 #  - agregados de MMGD (micro e minigeração distribuída), estimativas que o ONS publica por estado
-#    (ex.: "PQU MGMG MMGD"), com patamar noturno de ~1 GW;
+#    (ex.: "PQU MGMG MMGD"), que não são medição de uma usina física;
 #  - séries solares com média entre 0h e 4h acima de 2% do pico (dado agregado ou errado).
 FILTRO_FISICO = f"""
     {NOME_SQL} not like '%MMGD%'
@@ -95,6 +97,8 @@ def capacidade_e_local(con, tipo, sel):
     """Capacidade instalada (MW) e coordenadas: do conjunto 'fator de capacidade' do ONS quando houver,
     senão da configuração, senão do pico observado."""
     c = config(tipo)
+    if not sel["fixada"]:  # escolha automática: o cadastro é de outra usina, não serve
+        c.update(capacidade_mw=None, lat=None, lon=None)
     cap, lat, lon, origem = c["capacidade_mw"], c["lat"], c["lon"], "cadastro do portfólio"
     if sel["padrao"] and tem_tabela(con, "silver_fator_capacidade"):
         r = con.execute("""

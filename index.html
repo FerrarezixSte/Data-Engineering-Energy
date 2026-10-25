@@ -498,7 +498,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
           <article class="proj" data-cat="ia energia">
             <span class="cat">IA · Energia</span>
             <h3>Previsão de geração solar para o dia seguinte</h3>
-            <p class="muted">Gradient boosting treinado com a geração horária real do Complexo Solar São Gonçalo (ONS) e o tempo da região (Open-Meteo). Roda todo dia no pipeline, mede o erro nos últimos 14 dias contra a persistência e publica a previsão de amanhã neste site.</p>
+            <p class="muted">Gradient boosting treinado com a geração horária real do Complexo Solar Janaúba (ONS) e o tempo no local da usina (Open-Meteo). Roda todo dia no pipeline, mede o erro nos últimos 14 dias contra a persistência e publica a previsão de amanhã neste site.</p>
             <div class="chips"><span class="chip">Python</span><span class="chip">scikit-learn</span><span class="chip">Open-Meteo</span><span class="chip">séries temporais</span></div>
             <div class="links"><a href="#previsao">Ver previsão →</a></div>
           </article>
@@ -526,7 +526,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <div class="wrap">
       <div class="sec-head"><span class="tag-bus">B-04 · SCADA</span><h2>Sala de controle: solar e eólica.</h2></div>
       <div class="sec-body">
-        <p class="muted" style="margin-bottom:20px">É daqui que vêm os dados de uma usina: o SCADA lê cada inversor ou aerogerador, grava as tags com carimbo de tempo e qualidade e dispara alarmes. Escolha a usina, clique em uma unidade para ver as tags dela e acompanhe os eventos. Quando o pipeline publica os dados, o painel reproduz um dia real de duas usinas do Piauí: o Complexo Solar São Gonçalo e o Complexo Eólico Lagoa dos Ventos.</p>
+        <p class="muted" style="margin-bottom:20px">É daqui que vêm os dados de uma usina: o SCADA lê cada inversor ou aerogerador, grava as tags com carimbo de tempo e qualidade e dispara alarmes. Escolha a usina, clique em uma unidade para ver as tags dela e acompanhe os eventos. Quando o pipeline publica os dados, o painel reproduz um dia real de duas usinas: o Complexo Solar Janaúba (MG) e o Complexo Eólico Lagoa dos Ventos (PI).</p>
         <div class="scada running" id="scada-box">
           <div class="scada-bar">
             <div class="seg" role="group" aria-label="Escolher usina">
@@ -576,7 +576,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
           <div>
             <span class="tag-bus">Geração distribuída · MMGD</span>
             <h3>A energia dos telhados, que o ONS estima.</h3>
-            <p class="muted" style="margin-top:8px">A micro e minigeração distribuída (painéis em casas, comércios e pequenas usinas ligadas à distribuidora) não tem medição em tempo real no ONS. Ela aparece nos dados abertos como uma "usina" por estado, com valores estimados. Por isso o pipeline trata essas séries à parte: elas não seguem a física de uma usina (não zeram à noite, por exemplo) e não entram na escolha da usina solar nem na previsão.</p>
+            <p class="muted" style="margin-top:8px">A micro e minigeração distribuída (painéis em casas, comércios e pequenas usinas ligadas à distribuidora) não tem medição em tempo real no ONS. Ela aparece nos dados abertos como uma "usina" por estado, com valores estimados. Por isso o pipeline trata essas séries à parte: elas não entram na escolha da usina solar, no SCADA nem na previsão, e são somadas aqui para mostrar o tamanho da geração que acontece fora das grandes usinas.</p>
           </div>
           <figure class="scope" style="margin:0" aria-label="Geração distribuída estimada no Brasil ao longo do dia">
             <div class="scope-head"><span><b>MMGD · Brasil</b> · soma das séries estimadas · GW × hora</span><span id="mmgd-tag">estimativa ONS</span></div>
@@ -597,7 +597,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <div class="wrap">
       <div class="sec-head"><span class="tag-bus">B-05 · IA</span><h2>Previsão de geração solar para amanhã.</h2></div>
       <div class="sec-body">
-        <p class="muted" style="margin-bottom:20px">Um modelo de machine learning aprende a relação entre o tempo no local da usina e a geração real do Complexo Solar São Gonçalo (PI), a mesma do painel SCADA, e, todo dia, prevê a geração hora a hora do dia seguinte. O gráfico mostra os últimos dias (real × previsto, com dias fora do treino) e a previsão para amanhã.</p>
+        <p class="muted" style="margin-bottom:20px">Um modelo de machine learning aprende a relação entre o tempo no local da usina e a geração real do Complexo Solar Janaúba (MG), a mesma do painel SCADA, e, todo dia, prevê a geração hora a hora do dia seguinte. O gráfico mostra os últimos dias (real × previsto, com dias fora do treino) e a previsão para amanhã.</p>
         <figure class="scope" style="margin:0" aria-label="Gráfico de geração solar real e prevista">
           <div class="scope-head"><span><b id="pv-name">UFV exemplo</b> · potência ativa · MW por hora</span><span id="pv-tag">dados ilustrativos</span></div>
           <div class="coff-kpis" id="pv-kpis"></div>
@@ -1408,11 +1408,11 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     if (!bloco || !m || !m.horario || !m.horario.length) return;
     mmData = m; bloco.hidden = false;
     mmSc = escala(Math.max.apply(null, m.horario.map(function (p) { return p[1]; })));
-    var noite = m.horario.filter(function (p) { return p[0] <= 4; }), pico = Math.max.apply(null, m.horario.map(function (p) { return p[1]; }));
-    var mNoite = noite.length ? noite.reduce(function (a, p) { return a + p[1]; }, 0) / noite.length : 0;
+    var pico = Math.max.apply(null, m.horario.map(function (p) { return p[1]; }));
+    var hPico = m.horario.reduce(function (a, p) { return p[1] > a[1] ? p : a; })[0];
     document.getElementById('mmgd-tag').textContent = 'estimativa ONS · ' + dataBR(m.data);
     document.getElementById('mmgd-kpis').innerHTML =
-      kpi(fmt(pico / 1000, 1) + ' GW', 'pico estimado no dia') + kpi(fmt(mNoite / 1000, 1) + ' GW', 'média de 0h a 4h') +
+      kpi(fmt(pico / 1000, 1) + ' GW', 'pico estimado no dia') + kpi(dois(hPico) + 'h', 'hora do pico') +
       kpi(fmt(m.total_30d_gwh, 0) + ' GWh', 'últimos 30 dias') + kpi(fmt(m.series, 0), 'séries agregadas no ONS');
     var maxE = m.estados_30d_gwh.length ? m.estados_30d_gwh[0][1] : 1;
     document.getElementById('mmgd-estados').innerHTML = m.estados_30d_gwh.map(function (e) {
@@ -1537,7 +1537,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     var aviso = document.getElementById('pv-aviso');
     aviso.hidden = !(ganho !== null && ganho < 0);
     if (!aviso.hidden) aviso.textContent = 'Nos últimos ' + (d.dias_teste || 14) + ' dias, repetir a geração de ontem errou menos que o modelo. ' +
-      'Isso acontece em sequências de dias parecidos (céu limpo estável); o resultado fica publicado como veio, sem ajuste, porque é a métrica real do pipeline.';
+      'Isso acontece quando o tempo muda pouco de um dia para o outro; o resultado fica publicado como veio, sem ajuste, porque é a métrica real do pipeline.';
     document.getElementById('pv-name').textContent = d.usina + (d.estado ? ' (' + d.estado + ')' : '');
     if (d.ponto_clima) document.getElementById('pv-tag').title = 'Clima em ' + fmt(d.lat, 2) + ', ' + fmt(d.lon, 2) + ' (' + d.ponto_clima + ')';
     document.getElementById('pv-tag').textContent = 'dados reais ONS + Open-Meteo · previsão para ' + dataBR(d.amanha.data);
@@ -1558,7 +1558,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     bronze: ['Camada Bronze', 'Bronze · Python + Parquet', 'pipeline/ingest_ons.py baixa os arquivos (Parquet antes de CSV), padroniza os nomes de coluna para um esquema único e grava tudo como texto, com o arquivo de origem e o horário de ingestão.'],
     silver: ['Camada Silver', 'Silver · dbt', 'Converte tipos com try_cast e aplica as regras: instante válido, usina identificada, geração numérica e não negativa, fonte conhecida e sem duplicatas. O que falha vai para a quarentena com o motivo.'],
     gold: ['Camada Gold', 'Gold · dbt', 'Cinco tabelas: participação das fontes na matriz, energia diária por usina, curva típica do dia por estado, fator de capacidade mensal e energia eólica restringida por mês.'],
-    json: ['Publicação', 'data/ons.json', 'pipeline/export_site.py grava as curvas do Complexo Solar São Gonçalo e do Complexo Eólico Lagoa dos Ventos no mesmo dia, o replay do SCADA com o clima do Open-Meteo, a MMGD estimada e o parque mais restringido do mês.'],
+    json: ['Publicação', 'data/ons.json', 'pipeline/export_site.py grava as curvas do Complexo Solar Janaúba e do Complexo Eólico Lagoa dos Ventos no mesmo dia, o replay do SCADA com o clima do Open-Meteo, a MMGD estimada e o parque mais restringido do mês.'],
     meteo: ['Fonte', 'Open-Meteo', 'Irradiância global, direta e difusa, temperatura e nebulosidade dos últimos ~90 dias e a previsão de amanhã, sem chave de API.'],
     modelo: ['IA', 'Previsão de geração solar', 'pipeline/previsao_solar.py treina um gradient boosting (scikit-learn) com a geração real e o clima, avalia nos últimos 14 dias contra a persistência e prevê amanhã hora a hora.'],
     prevjson: ['Publicação', 'data/previsao_solar.json', 'Métricas de erro, os últimos 7 dias real × previsto e a previsão de amanhã, lidos pela seção de IA do site.'],
