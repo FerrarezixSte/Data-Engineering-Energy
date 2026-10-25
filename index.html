@@ -296,6 +296,20 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 .coff-canvas { width: 100%; height: 240px; display: block; cursor: crosshair; touch-action: pan-y; }
 .scope-legend span.amb::before { height: 8px; background: var(--todo); background: color-mix(in srgb, var(--todo) 45%, transparent); }
 @media (max-width: 800px) { .coff-kpis { grid-template-columns: repeat(2, 1fr); } }
+[hidden] { display: none !important; }
+.sc-mode { margin-left: 8px; padding: 1px 7px; border: 1px solid var(--todo); border-radius: 3px; color: var(--todo); font: .66rem var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
+.sc-mode.real { border-color: var(--copper); color: var(--copper); }
+.q.q-est { color: var(--todo); }
+.q.q-ext, .q.q-sim { color: var(--muted); }
+.pv-aviso { margin-top: 10px; padding: 10px 12px; border-left: 3px solid var(--todo); font-size: .74rem; color: var(--muted); background: var(--copper-soft); }
+.mmgd-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; align-items: start; }
+.mmgd-grid > * { min-width: 0; }
+.mmgd-uf { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; font: .74rem var(--font-mono); }
+.mmgd-uf li { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center; }
+.mmgd-uf .bar i { background: var(--grid); }
+.mmgd-uf .num { font-variant-numeric: tabular-nums; color: var(--muted); }
+@media (max-width: 760px) { .mmgd-grid { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .units { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px; } }
 .pause[aria-pressed="true"] { border-color: var(--todo); color: var(--todo); }
 .scada-note { padding: 10px 14px; border-top: 1px solid var(--line); font: .72rem var(--font-mono); color: var(--muted); }
 @media (max-width: 800px) {
@@ -474,7 +488,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
             <p class="muted">Todo dia o GitHub Actions baixa os dados abertos do ONS (geração horária por usina, fator de capacidade e restrição de operação de eólicas), o DuckDB processa e o dbt monta as camadas Silver e Gold com regras de qualidade, quarentena e testes. O resultado é publicado neste site: as curvas reais do topo, o gráfico de restrição e a previsão solar vêm dele.</p>
             <div class="metrics">
               <div class="metric"><b>1×/dia</b><span>atualização automática</span></div>
-              <div class="metric"><b>32</b><span>testes dbt por execução</span></div>
+              <div class="metric"><b>21</b><span>testes dbt por execução</span></div>
               <div class="metric"><b>5</b><span>tabelas Gold</span></div>
               <div class="metric"><b>R$ 0</b><span>custo de infraestrutura</span></div>
             </div>
@@ -484,7 +498,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
           <article class="proj" data-cat="ia energia">
             <span class="cat">IA · Energia</span>
             <h3>Previsão de geração solar para o dia seguinte</h3>
-            <p class="muted">Gradient boosting treinado com a geração horária real de uma usina (ONS) e o tempo da região (Open-Meteo). Roda todo dia no pipeline, mede o erro nos últimos 14 dias contra a persistência e publica a previsão de amanhã neste site.</p>
+            <p class="muted">Gradient boosting treinado com a geração horária real do Complexo Solar São Gonçalo (ONS) e o tempo da região (Open-Meteo). Roda todo dia no pipeline, mede o erro nos últimos 14 dias contra a persistência e publica a previsão de amanhã neste site.</p>
             <div class="chips"><span class="chip">Python</span><span class="chip">scikit-learn</span><span class="chip">Open-Meteo</span><span class="chip">séries temporais</span></div>
             <div class="links"><a href="#previsao">Ver previsão →</a></div>
           </article>
@@ -512,14 +526,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <div class="wrap">
       <div class="sec-head"><span class="tag-bus">B-04 · SCADA</span><h2>Sala de controle: solar e eólica.</h2></div>
       <div class="sec-body">
-        <p class="muted" style="margin-bottom:20px">É daqui que vêm os dados de uma usina: o SCADA lê cada inversor ou aerogerador, grava as tags com carimbo de tempo e qualidade e dispara alarmes. Escolha a usina, clique em uma unidade para ver as tags dela e acompanhe os eventos.</p>
+        <p class="muted" style="margin-bottom:20px">É daqui que vêm os dados de uma usina: o SCADA lê cada inversor ou aerogerador, grava as tags com carimbo de tempo e qualidade e dispara alarmes. Escolha a usina, clique em uma unidade para ver as tags dela e acompanhe os eventos. Quando o pipeline publica os dados, o painel reproduz um dia real de duas usinas do Piauí: o Complexo Solar São Gonçalo e o Complexo Eólico Lagoa dos Ventos.</p>
         <div class="scada running" id="scada-box">
           <div class="scada-bar">
             <div class="seg" role="group" aria-label="Escolher usina">
               <button type="button" id="sc-solar" data-p="solar" aria-pressed="true">Solar · UFV</button>
               <button type="button" id="sc-eol" data-p="eol" aria-pressed="false">Eólica · EOL</button>
             </div>
-            <span class="live"><i></i><span id="sc-name">UFV Exemplo · 35 MWp</span></span>
+            <span class="live"><i></i><span id="sc-name">UFV Exemplo · 35 MWp</span><span class="sc-mode" id="sc-mode">simulação</span></span>
             <span id="sc-clock">--:--:--</span>
             <span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button type="button" class="pause" id="sc-coff" aria-pressed="false" hidden>Simular ordem do ONS</button><button type="button" class="pause" id="sc-pause">Pausar</button></span>
           </div>
@@ -537,7 +551,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
               </div>
             </div>
           </div>
-          <div class="scada-note">Simulação ilustrativa no navegador. Os valores seguem a física de cada fonte (irradiância e temperatura no solar; curva de potência, pitch e rotor no eólico), mas não são dados reais de nenhuma usina. No eólico, o botão "Simular ordem do ONS" limita o parque a cerca de metade da potência disponível, como numa restrição de operação.</div>
+          <div class="scada-note" id="sc-note"></div>
         </div>
 
         <div class="coff" id="restricao">
@@ -558,6 +572,22 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
             <p class="readout" id="coff-readout" aria-live="polite"></p>
           </figure>
         </div>
+        <div class="coff" id="mmgd" hidden>
+          <div>
+            <span class="tag-bus">Geração distribuída · MMGD</span>
+            <h3>A energia dos telhados, que o ONS estima.</h3>
+            <p class="muted" style="margin-top:8px">A micro e minigeração distribuída (painéis em casas, comércios e pequenas usinas ligadas à distribuidora) não tem medição em tempo real no ONS. Ela aparece nos dados abertos como uma "usina" por estado, com valores estimados. Por isso o pipeline trata essas séries à parte: elas não seguem a física de uma usina (não zeram à noite, por exemplo) e não entram na escolha da usina solar nem na previsão.</p>
+          </div>
+          <figure class="scope" style="margin:0" aria-label="Geração distribuída estimada no Brasil ao longo do dia">
+            <div class="scope-head"><span><b>MMGD · Brasil</b> · soma das séries estimadas · GW × hora</span><span id="mmgd-tag">estimativa ONS</span></div>
+            <div class="coff-kpis" id="mmgd-kpis"></div>
+            <div class="mmgd-grid">
+              <canvas class="coff-canvas" id="mmgd-chart" role="img" aria-label="Curva estimada da geração distribuída ao longo do dia"></canvas>
+              <div><p class="mono muted" style="font-size:.72rem;margin-bottom:8px">Estados com mais energia estimada · 30 dias</p><ul class="mmgd-uf" id="mmgd-estados"></ul></div>
+            </div>
+            <p class="readout" id="mmgd-readout" aria-live="polite"></p>
+          </figure>
+        </div>
       </div>
     </div>
   </section>
@@ -567,7 +597,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <div class="wrap">
       <div class="sec-head"><span class="tag-bus">B-05 · IA</span><h2>Previsão de geração solar para amanhã.</h2></div>
       <div class="sec-body">
-        <p class="muted" style="margin-bottom:20px">Um modelo de machine learning aprende a relação entre o tempo e a geração real de uma usina solar e, todo dia, prevê a geração hora a hora do dia seguinte. O gráfico mostra os últimos dias (real × previsto, com dias fora do treino) e a previsão para amanhã.</p>
+        <p class="muted" style="margin-bottom:20px">Um modelo de machine learning aprende a relação entre o tempo no local da usina e a geração real do Complexo Solar São Gonçalo (PI), a mesma do painel SCADA, e, todo dia, prevê a geração hora a hora do dia seguinte. O gráfico mostra os últimos dias (real × previsto, com dias fora do treino) e a previsão para amanhã.</p>
         <figure class="scope" style="margin:0" aria-label="Gráfico de geração solar real e prevista">
           <div class="scope-head"><span><b id="pv-name">UFV exemplo</b> · potência ativa · MW por hora</span><span id="pv-tag">dados ilustrativos</span></div>
           <div class="coff-kpis" id="pv-kpis"></div>
@@ -578,6 +608,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
             <span class="amb" style="--c: transparent">previsão para amanhã</span>
           </div>
           <p class="readout" id="pv-readout" aria-live="polite"></p>
+          <p class="pv-aviso mono" id="pv-aviso" hidden></p>
         </figure>
         <div class="lessons" aria-label="Como funciona a previsão">
           <div class="lesson"><span class="p">Dados</span><p>Geração horária real da usina, do ONS, e o tempo da região, do Open-Meteo: irradiância global, direta e difusa, temperatura e nebulosidade.</p></div>
@@ -626,7 +657,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
             <g class="node" data-k="meteo" tabindex="0" role="button" aria-label="Open-Meteo"><rect class="d-box" x="20" y="280" width="140" height="80" rx="6"/><text class="d-l" x="34" y="304">FONTE</text><text class="d-t" x="34" y="328">Open-Meteo</text><text class="d-s" x="34" y="348">clima</text></g>
             <g class="node" data-k="modelo" tabindex="0" role="button" aria-label="Modelo de previsão"><rect class="d-box" x="355" y="280" width="140" height="80" rx="6"/><text class="d-l" x="369" y="304">IA</text><text class="d-t" x="369" y="328">Previsão solar</text><text class="d-s" x="369" y="348">scikit-learn</text></g>
             <g class="node" data-k="prevjson" tabindex="0" role="button" aria-label="previsao_solar.json"><rect class="d-box" x="670" y="280" width="130" height="80" rx="6"/><text class="d-t" x="684" y="310">previsao_</text><text class="d-t" x="684" y="328">solar.json</text></g>
-            <g class="node" data-k="orch" tabindex="0" role="button" aria-label="Orquestração"><rect class="d-orch" x="190" y="400" width="610" height="56" rx="6"/><text class="d-g" x="206" y="422">GITHUB ACTIONS · TODO DIA ÀS 06:17</text><text class="d-s" x="206" y="443">ingestão → dbt build (32 testes) → export → previsão → deploy</text></g>
+            <g class="node" data-k="orch" tabindex="0" role="button" aria-label="Orquestração"><rect class="d-orch" x="190" y="400" width="610" height="56" rx="6"/><text class="d-g" x="206" y="422">GITHUB ACTIONS · TODO DIA ÀS 06:17</text><text class="d-s" x="206" y="443">ingestão → dbt build (21 testes) → export → previsão → deploy</text></g>
           </svg>
         </div>
         <div class="arch-bar">
@@ -657,6 +688,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
               <li>R3 geração numérica</li>
               <li>R4 geração não negativa</li>
               <li>R5 fonte conhecida · sem duplicatas</li>
+          <li>Aviso físico: solar não gera à noite · MMGD tratada à parte</li>
             </ul>
           </div>
           <div style="--c:#d6a92e">
@@ -673,7 +705,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
         <div class="lessons" aria-label="Decisões técnicas">
           <div class="lesson"><span class="p">Custo zero</span><p>GitHub Actions agenda e roda tudo; DuckDB processa os arquivos sem servidor de banco; o site é estático no GitHub Pages.</p></div>
-          <div class="lesson"><span class="p">Teste que falha não publica</span><p>O dbt build roda 32 testes, entre eles Bronze = Silver + quarentena e energia da Gold = Silver. Se algum falhar, os dados do site não são atualizados.</p></div>
+          <div class="lesson"><span class="p">Teste que falha não publica</span><p>O dbt build roda 21 testes, entre eles Bronze = Silver + quarentena e energia da Gold = Silver. Se algum falhar, os dados do site não são atualizados.</p></div>
           <div class="lesson"><span class="p">Fonte muda, pipeline não quebra</span><p>A ingestão descobre sozinha a pasta de cada conjunto no ONS e mapeia nomes de coluna alternativos para um esquema padrão.</p></div>
         </div>
       </div>
@@ -846,7 +878,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       ctx.fillText('pico ' + fmt(pk[1], 1) + ' MW', X(pk[0]) + (ctx.textAlign === 'right' ? -8 : 8), Y(pk[1]) - 2);
     }
   }
-  function draw() { charts.forEach(drawChart); if (typeof drawCoff === 'function') drawCoff(); if (typeof drawPv === 'function') drawPv(); }
+  function draw() { charts.forEach(drawChart); if (typeof drawCoff === 'function') drawCoff(); if (typeof drawPv === 'function') drawPv(); if (typeof drawMmgd === 'function') drawMmgd(); }
   function setReadout(ch) {
     var passo = ch.data.length > 1 ? ch.data[1][0] - ch.data[0][0] : 1;
     if (ch.hover === null) {
@@ -898,33 +930,57 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   apply(mode);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
 
-  // ---------- SCADA simulado ----------
+  // ---------- SCADA ----------
+  // Dois modos por usina:
+  //  - simulação: usina de exemplo, valores gerados no navegador (sem data/ons.json);
+  //  - replay ONS: a usina real do pipeline (data/ons.json → scada), reproduzindo o dia hora a hora com a
+  //    geração verificada pelo ONS e o tempo da região (Open-Meteo). O ONS publica só o total do complexo,
+  //    então a divisão por bloco/grupo e as tags internas são estimadas (qualidade EST).
   var box = document.getElementById('scada-box');
   var unitsEl = document.getElementById('sc-units'), kpisEl = document.getElementById('sc-kpis');
   var tagsEl = document.getElementById('sc-tags'), evEl = document.getElementById('sc-events');
   var plant = 'solar', sel = 0, running = !reduce, timer = null;
   var events = { solar: [], eol: [] };
+  var REAL = { solar: null, eol: null }, rt = 6; // relógio do replay (hora do dia, 0-24)
   function now() { return new Date().toLocaleTimeString('pt-BR', { hour12: false }); }
-  function logEv(p, txt, warn) { events[p].unshift({ t: now(), txt: txt, warn: !!warn }); events[p] = events[p].slice(0, 6); }
+  function relogio(p) { return REAL[p] ? hhmm(rt) : now(); }
+  function logEv(p, txt, warn) { events[p].unshift({ t: relogio(p), txt: txt, warn: !!warn }); events[p] = events[p].slice(0, 7); }
 
-  // usina solar: 8 inversores de 4,375 MW
-  var S = { G: 870, Tamb: 29, inv: [] };
+  // usina solar de exemplo: 8 inversores de 4,375 MW
+  var S = { G: 870, Tamb: 29, inv: [], cap: 35, unitCap: 4.375, e: 0 };
   for (var i = 0; i < 8; i++) S.inv.push({ id: 'INV-0' + (i + 1), eff: 0.975 + Math.random() * 0.015, T: 44 + Math.random() * 6, hot: false, p: 0 });
-  // parque eólico: 6 aerogeradores de 4,2 MW (WTG-05 em manutenção)
-  var E = { v0: 9.8, dir: 112, wtg: [], limite: null, restrito: 0, disp: 0 };
+  // parque eólico de exemplo: 6 aerogeradores de 4,2 MW (WTG-05 em manutenção)
+  var E = { v0: 9.8, dir: 112, wtg: [], limite: null, restrito: 0, disp: 0, cap: 25.2, unitCap: 4.2, e: 0 };
   for (var j = 0; j < 6; j++) E.wtg.push({ id: 'WTG-0' + (j + 1), off: (j - 2.5) * 0.35, v: 0, p: 0, rpm: 0, pitch: 0, rated: false, man: j === 4 });
-  function curvaPotencia(v) { // curva de potência típica: partida 3 m/s, nominal 12 m/s, corte 25 m/s
+  function curvaPotencia(v) { // curva de potência típica: partida 3 m/s, nominal 12 m/s, corte 25 m/s (fração da nominal)
     if (v < 3 || v >= 25) return 0;
-    if (v >= 12) return 4.2;
-    return 4.2 * Math.pow((v - 3) / 9, 2.6);
+    if (v >= 12) return 1;
+    return Math.pow((v - 3) / 9, 2.6);
   }
-  function step() {
+  function velDaPotencia(fr) { // inverso aproximado da curva, para estimar o vento quando falta o clima
+    return fr <= 0 ? 2.5 : fr >= 1 ? 12.5 : 3 + 9 * Math.pow(fr, 1 / 2.6);
+  }
+  function interp(serie, h, col) { // série horária [[hora, v...]] lida no meio de cada hora (média da hora)
+    if (!serie || !serie.length) return null;
+    col = col || 1;
+    var x = h - 0.5, a = null, b = null;
+    for (var k = 0; k < serie.length; k++) {
+      if (serie[k][0] <= x) a = serie[k];
+      if (serie[k][0] >= x) { b = serie[k]; break; }
+    }
+    if (!a) a = serie[0]; if (!b) b = serie[serie.length - 1];
+    var va = a[col], vb = b[col];
+    if (va === null || va === undefined) return vb; if (vb === null || vb === undefined) return va;
+    return a[0] === b[0] ? va : va + (vb - va) * (x - a[0]) / (b[0] - a[0]);
+  }
+
+  function stepSim() {
     S.G = clamp(S.G + rnd(25), 640, 1010);
     var Tmod = S.Tamb + S.G * 0.026;
     S.inv.forEach(function (u, k) {
       u.T = clamp(u.T + rnd(1.2) + (k === 2 ? 0.25 : 0) - (u.T > 62 ? 1.5 : 0), 38, 66);
       var derate = u.T > 60 ? 0.85 : 1;
-      u.p = 4.375 * S.G / 1000 * (1 - 0.004 * (Tmod - 25)) * u.eff * derate;
+      u.p = S.unitCap * S.G / 1000 * (1 - 0.004 * (Tmod - 25)) * u.eff * derate;
       u.vdc = 1180 + rnd(25); u.q = rnd(0.15);
       var hot = u.T > 60;
       if (hot && !u.hot) logEv('solar', u.id + ' temperatura alta (' + fmt(u.T, 0) + ' °C), limitação de potência', true);
@@ -932,91 +988,212 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       u.hot = hot;
     });
     S.Tmod = Tmod;
+  }
+  function stepSimEol() {
     E.v0 = clamp(E.v0 + rnd(0.45), 6.5, 14.5); E.dir = (E.dir + rnd(2) + 360) % 360;
     E.wtg.forEach(function (u) {
       if (u.man) { u.v = clamp(E.v0 + u.off + rnd(0.3), 0, 30); u.p = 0; u.pDisp = 0; u.rpm = 0; u.pitch = 88; return; }
       u.v = clamp(E.v0 + u.off + rnd(0.6), 0, 30);
-      u.p = curvaPotencia(u.v) * (0.98 + Math.random() * 0.02);
-      u.rpm = u.p > 0 ? clamp(5 + u.v * 0.85, 5, 14.8) : 0;
-      u.pitch = u.v > 12 ? (u.v - 12) * 2.4 : 0.5;
-      var rated = u.v >= 12;
-      if (rated && !u.rated) logEv('eol', u.id + ' em potência nominal, controle de pitch atuando');
-      if (!rated && u.rated) logEv('eol', u.id + ' abaixo da nominal (' + fmt(u.v, 1) + ' m/s)');
-      u.rated = rated;
+      u.p = E.unitCap * curvaPotencia(u.v) * (0.98 + Math.random() * 0.02);
       u.pDisp = u.p;
     });
-    // ordem de restrição do ONS: limita a potência total do parque e redistribui entre as máquinas
-    var disp = E.wtg.reduce(function (a, u) { return a + u.pDisp; }, 0);
+  }
+
+  // replay: o total vem do ONS; cada bloco/grupo recebe uma fração estável do total
+  function stepRealSolar(R, dt) {
+    var P = Math.max(0, interp(R.horario, rt) || 0), cap = R.capacidade_mw || 1;
+    var G = R.clima ? Math.max(0, interp(R.clima, rt) || 0) : 1000 * P / cap;
+    var Tamb = R.clima ? interp(R.clima, rt, 2) : 27;
+    S.G = G; S.Tamb = Tamb; S.Tmod = Tamb + G * 0.026; S.cap = cap; S.unitCap = cap / S.inv.length;
+    var soma = S.inv.reduce(function (a, u) { return a + u.eff; }, 0);
+    S.inv.forEach(function (u) {
+      u.p = P * u.eff / soma;
+      var carga = u.p / S.unitCap;
+      u.T = S.Tamb + 6 + 28 * carga + rnd(0.6);
+      u.vdc = u.p > 0.5 ? 1150 - 120 * (S.Tmod - 25) / 50 + rnd(8) : (G > 5 ? 1350 : 0);
+      u.q = u.p > 0.5 ? rnd(0.02 * u.p) : 0;
+      var hot = u.T > 60;
+      if (hot && !u.hot) logEv('solar', u.id + ' temperatura alta (' + fmt(u.T, 0) + ' °C)', true);
+      u.hot = hot;
+    });
+    S.e += P * dt;
+    var fr = P / cap, prev = S.frAnt === undefined ? fr : S.frAnt, rampa = (fr - prev) / dt; // fração da capacidade por hora
+    if (prev < 0.01 && fr >= 0.01) logEv('solar', 'Início da geração: inversores conectados à rede');
+    if (prev >= 0.01 && fr < 0.01) logEv('solar', 'Fim da geração do dia · ' + fmt(S.e, 0) + ' MWh');
+    if (rampa < -0.18 && fr > 0.05 && !S.rampa) { logEv('solar', 'Rampa de queda de ' + fmt(-rampa * 100, 0) + '% da capacidade/h (provável nebulosidade)', true); S.rampa = true; }
+    if (rampa > -0.05) S.rampa = false;
+    if (R.pico_h !== undefined && Math.abs(rt - (R.pico_h + 0.5)) < dt / 2) logEv('solar', 'Pico do dia: ' + fmt(R.pico, 0) + ' MW (' + fmt(R.pico / cap * 100, 0) + '% da capacidade)');
+    S.frAnt = fr; S.P = P;
+  }
+  function stepRealEol(R, dt) {
+    var P = Math.max(0, interp(R.horario, rt) || 0), cap = R.capacidade_mw || 1;
+    E.cap = cap; E.unitCap = cap / E.wtg.length;
+    var v = R.clima ? interp(R.clima, rt, 3) : velDaPotencia(P / cap);
+    E.v0 = v; E.dir = R.clima ? interp(R.clima, rt, 4) : E.dir;
+    var pesos = E.wtg.map(function (u) { u.v = clamp(v + u.off + rnd(0.08), 0, 30); return Math.exp(0.35 * (u.v - v)); /* grupo com mais vento leva parte maior */ });
+    var soma = pesos.reduce(function (a, b) { return a + b; }, 0);
+    E.wtg.forEach(function (u, k) {
+      u.pDisp = Math.min(E.unitCap, P * pesos[k] / soma);
+      u.p = u.pDisp;
+      u.rpm = u.p > 0.01 * E.unitCap ? clamp(5 + u.v * 0.85, 5, 14.8) : 0;
+      u.pitch = u.v > 12 ? (u.v - 12) * 2.4 : 0.5;
+      var rated = u.p > 0.97 * E.unitCap;
+      if (rated && !u.rated) logEv('eol', u.id + ' em potência nominal, pitch atuando');
+      u.rated = rated;
+    });
+    E.e += P * dt;
+    if (R.pico_h !== undefined && Math.abs(rt - (R.pico_h + 0.5)) < dt / 2) logEv('eol', 'Pico do dia: ' + fmt(R.pico, 0) + ' MW (' + fmt(R.pico / cap * 100, 0) + '% da capacidade)');
+  }
+  function aplicarLimite() { // ordem de restrição do ONS (botão): limita o total e redistribui entre as máquinas
+    var disp = E.wtg.reduce(function (a, u) { return a + (u.pDisp || 0); }, 0);
     E.disp = disp; E.restrito = 0;
     if (E.limite !== null && disp > E.limite) {
       var fr = E.limite / disp;
       E.wtg.forEach(function (u) { if (!u.man) { u.p = u.pDisp * fr; u.pitch += (1 - fr) * 14; u.lim = true; } });
       E.restrito = disp - E.limite;
     } else E.wtg.forEach(function (u) { u.lim = false; });
+    if (!REAL.eol) E.wtg.forEach(function (u) {
+      if (u.man) return;
+      u.rpm = u.p > 0 ? clamp(5 + u.v * 0.85, 5, 14.8) : 0;
+      if (!u.lim) u.pitch = u.v > 12 ? (u.v - 12) * 2.4 : 0.5;
+      var rated = u.v >= 12;
+      if (rated && !u.rated) logEv('eol', u.id + ' em potência nominal, controle de pitch atuando');
+      if (!rated && u.rated) logEv('eol', u.id + ' abaixo da nominal (' + fmt(u.v, 1) + ' m/s)');
+      u.rated = rated;
+    });
+  }
+  var PASSO_H = 1 / 6; // cada atualização avança 10 minutos do dia real
+  function step() {
+    if (REAL.solar || REAL.eol) {
+      rt += PASSO_H;
+      if (rt >= 24) { rt -= 24; S.e = 0; E.e = 0; S.frAnt = undefined; logEv(REAL.solar ? 'solar' : 'eol', 'Replay reiniciado: 00:00 de ' + dataBR((REAL.solar || REAL.eol).data)); }
+    }
+    if (REAL.solar) stepRealSolar(REAL.solar, PASSO_H); else stepSim();
+    if (REAL.eol) stepRealEol(REAL.eol, PASSO_H); else stepSimEol();
+    aplicarLimite();
   }
   function kpi(v, l) { return '<div class="kpi"><b>' + v + '</b><span>' + l + '</span></div>'; }
   function render() {
-    document.getElementById('sc-clock').textContent = now();
+    var real = REAL[plant];
+    document.getElementById('sc-clock').textContent = real ? dataBR(real.data) + ' · ' + hhmm(rt) : now();
     var html = '', ptot;
     if (plant === 'solar') {
       ptot = S.inv.reduce(function (a, u) { return a + u.p; }, 0);
       var ok = S.inv.filter(function (u) { return !u.hot; }).length;
-      kpisEl.innerHTML = kpi(fmt(ptot, 1) + ' MW', 'potência ativa') + kpi(fmt(S.G, 0), 'irradiância W/m²') + kpi(fmt(S.Tmod, 1) + ' °C', 'temperatura do módulo') + kpi(fmt(ok / 8 * 100, 0) + '%', 'inversores sem restrição');
+      kpisEl.innerHTML = kpi(fmt(ptot, ptot >= 100 ? 0 : 1) + ' MW', real ? 'potência ativa (ONS)' : 'potência ativa') +
+        kpi(fmt(S.G, 0), real ? (real.clima ? 'irradiância W/m² · Open-Meteo' : 'irradiância W/m² · estimada') : 'irradiância W/m²') +
+        (real ? kpi(fmt(ptot / S.cap * 100, 0) + '%', 'fator de capacidade agora') + kpi(fmt(S.e, 0) + ' MWh', 'energia no dia até agora')
+              : kpi(fmt(S.Tmod, 1) + ' °C', 'temperatura do módulo') + kpi(fmt(ok / 8 * 100, 0) + '%', 'inversores sem restrição'));
       S.inv.forEach(function (u, k) {
         html += '<button type="button" class="unit" data-i="' + k + '" aria-pressed="' + (k === sel) + '"><span class="u-name">' + u.id + '<span class="dot' + (u.hot ? ' warn' : '') + '"></span></span>' +
-          '<span class="u-val">' + fmt(u.p, 2) + '<small>MW</small></span><span class="bar"><i style="width:' + (u.p / 4.375 * 100).toFixed(0) + '%"></i></span>' +
-          '<span class="u-sub">' + fmt(u.T, 0) + ' °C</span></button>';
+          '<span class="u-val">' + fmt(u.p, u.p >= 100 ? 0 : 2) + '<small>MW</small></span><span class="bar"><i style="width:' + clamp(u.p / S.unitCap * 100, 0, 100).toFixed(0) + '%"></i></span>' +
+          '<span class="u-sub">' + fmt(u.T, 0) + ' °C' + (real ? ' · est.' : '') + '</span></button>';
       });
     } else {
       ptot = E.wtg.reduce(function (a, u) { return a + u.p; }, 0);
-      var vm = E.wtg.reduce(function (a, u) { return a + u.v; }, 0) / 6, disp = E.wtg.filter(function (u) { return !u.man; }).length;
-      kpisEl.innerHTML = kpi(fmt(ptot, 1) + ' MW', 'potência ativa') + kpi(fmt(vm, 1) + ' m/s', 'vento médio (nacele)') + (E.limite !== null ? kpi(fmt(E.restrito, 1) + ' MW', 'restringido pelo ONS agora') : kpi(fmt(ptot / 25.2 * 100, 0) + '%', 'fator de capacidade agora')) + kpi(fmt(disp / 6 * 100, 0) + '%', 'disponibilidade');
+      var ativos = E.wtg.filter(function (u) { return !u.man; }), vm = E.wtg.reduce(function (a, u) { return a + u.v; }, 0) / E.wtg.length;
+      kpisEl.innerHTML = kpi(fmt(ptot, ptot >= 100 ? 0 : 1) + ' MW', real ? 'potência ativa (ONS)' : 'potência ativa') +
+        kpi(fmt(vm, 1) + ' m/s', real ? (real.clima ? 'vento a 100 m · Open-Meteo' : 'vento estimado pela potência') : 'vento médio (nacele)') +
+        (E.limite !== null ? kpi(fmt(E.restrito, ptot >= 100 ? 0 : 1) + ' MW', 'restringido pelo ONS (simulação)') : kpi(fmt(ptot / E.cap * 100, 0) + '%', 'fator de capacidade agora')) +
+        (real ? kpi(fmt(E.e, 0) + ' MWh', 'energia no dia até agora') : kpi(fmt(ativos.length / E.wtg.length * 100, 0) + '%', 'disponibilidade'));
       E.wtg.forEach(function (u, k) {
-        html += '<button type="button" class="unit" data-i="' + k + '" aria-pressed="' + (k === sel) + '"><span class="u-name">' + u.id + '<span class="dot' + (u.man ? ' off' : '') + '"></span></span>' +
-          '<span class="u-val">' + (u.man ? 'MAN' : fmt(u.p, 2) + '<small>MW</small>') + '</span><span class="bar"><i style="width:' + (u.p / 4.2 * 100).toFixed(0) + '%"></i></span>' +
+        html += '<button type="button" class="unit" data-i="' + k + '" aria-pressed="' + (k === sel) + '"><span class="u-name">' + u.id + '<span class="dot' + (u.man ? ' off' : u.lim ? ' warn' : '') + '"></span></span>' +
+          '<span class="u-val">' + (u.man ? 'MAN' : fmt(u.p, u.p >= 100 ? 0 : 2) + '<small>MW</small>') + '</span><span class="bar"><i style="width:' + clamp(u.p / E.unitCap * 100, 0, 100).toFixed(0) + '%"></i></span>' +
           '<span class="u-sub">' + fmt(u.v, 1) + ' m/s · ' + fmt(u.rpm, 1) + ' rpm</span></button>';
       });
     }
     unitsEl.innerHTML = html;
     var rows = [], pre;
     if (plant === 'solar') {
-      var u = S.inv[sel]; pre = 'UFV01.' + u.id.replace('-', '');
-      document.getElementById('sc-unit-title').textContent = 'Tags · ' + u.id;
-      rows = [['P_ATIVA', fmt(u.p, 3), 'MW'], ['P_REATIVA', fmt(u.q, 3), 'Mvar'], ['V_CC', fmt(u.vdc, 0), 'V'], ['T_INTERNA', fmt(u.T, 1), '°C'], ['IRRAD_POA', fmt(S.G, 0), 'W/m²'], ['ESTADO', u.hot ? 'LIMITADO' : 'OPERANDO', '']];
+      var u = S.inv[sel]; pre = (real ? 'UFV.' : 'UFV01.') + u.id.replace('-', '');
+      document.getElementById('sc-unit-title').textContent = 'Tags · ' + u.id + (real ? ' (' + fmt(S.unitCap, 0) + ' MW)' : '');
+      rows = real
+        ? [['P_ATIVA', fmt(u.p, 2), 'MW', 'EST'], ['P_REATIVA', fmt(u.q, 2), 'Mvar', 'EST'], ['V_CC', fmt(u.vdc, 0), 'V', 'EST'], ['T_INTERNA', fmt(u.T, 1), '°C', 'EST'],
+           ['IRRAD_GHI', fmt(S.G, 0), 'W/m²', real.clima ? 'EXT' : 'EST'], ['T_AMBIENTE', fmt(S.Tamb, 1), '°C', real.clima ? 'EXT' : 'EST'], ['P_TOTAL_UFV', fmt(ptot, 1), 'MW', 'GOOD'],
+           ['ESTADO', u.p > 0.5 ? (u.hot ? 'LIMITADO' : 'OPERANDO') : 'STANDBY', '', 'EST']]
+        : [['P_ATIVA', fmt(u.p, 3), 'MW'], ['P_REATIVA', fmt(u.q, 3), 'Mvar'], ['V_CC', fmt(u.vdc, 0), 'V'], ['T_INTERNA', fmt(u.T, 1), '°C'], ['IRRAD_POA', fmt(S.G, 0), 'W/m²'], ['ESTADO', u.hot ? 'LIMITADO' : 'OPERANDO', '']];
     } else {
-      var t = E.wtg[sel]; pre = 'EOL01.' + t.id.replace('-', '');
-      document.getElementById('sc-unit-title').textContent = 'Tags · ' + t.id;
-      rows = [['P_ATIVA', fmt(t.p, 3), 'MW'], ['P_DISPONIVEL', fmt(t.pDisp || 0, 3), 'MW'], ['VENTO', fmt(t.v, 1), 'm/s'], ['ROTOR', fmt(t.rpm, 1), 'rpm'], ['PITCH', fmt(t.pitch, 1), '°'], ['YAW_DIR', fmt(E.dir, 0), '°'], ['ESTADO', t.man ? 'MANUTENÇÃO' : t.lim ? 'LIMITADO ONS' : t.rated ? 'NOMINAL' : 'OPERANDO', '']];
+      var t = E.wtg[sel]; pre = (real ? 'EOL.' : 'EOL01.') + t.id.replace('-', '');
+      document.getElementById('sc-unit-title').textContent = 'Tags · ' + t.id + (real ? ' (' + fmt(E.unitCap, 0) + ' MW)' : '');
+      var est = t.man ? 'MANUTENÇÃO' : t.lim ? 'LIMITADO ONS' : t.rated ? 'NOMINAL' : t.p > 0.01 * E.unitCap ? 'OPERANDO' : 'SEM VENTO';
+      rows = real
+        ? [['P_ATIVA', fmt(t.p, 2), 'MW', 'EST'], ['P_DISPONIVEL', fmt(t.pDisp || 0, 2), 'MW', 'EST'], ['VENTO_100M', fmt(t.v, 1), 'm/s', real.clima ? 'EXT' : 'EST'], ['ROTOR', fmt(t.rpm, 1), 'rpm', 'EST'],
+           ['PITCH', fmt(t.pitch, 1), '°', 'EST'], ['YAW_DIR', fmt(E.dir, 0), '°', real.clima ? 'EXT' : 'EST'], ['P_TOTAL_EOL', fmt(ptot, 1), 'MW', E.limite !== null ? 'SIM' : 'GOOD'], ['ESTADO', est, '', 'EST']]
+        : [['P_ATIVA', fmt(t.p, 3), 'MW'], ['P_DISPONIVEL', fmt(t.pDisp || 0, 3), 'MW'], ['VENTO', fmt(t.v, 1), 'm/s'], ['ROTOR', fmt(t.rpm, 1), 'rpm'], ['PITCH', fmt(t.pitch, 1), '°'], ['YAW_DIR', fmt(E.dir, 0), '°'], ['ESTADO', est, '']];
     }
     tagsEl.innerHTML = rows.map(function (r) {
-      return '<tr><td>' + pre + '.' + r[0] + '</td><td class="num">' + r[1] + '</td><td>' + r[2] + '</td><td class="q">GOOD</td></tr>';
+      return '<tr><td>' + pre + '.' + r[0] + '</td><td class="num">' + r[1] + '</td><td>' + r[2] + '</td><td class="q' + (r[3] && r[3] !== 'GOOD' ? ' q-' + r[3].toLowerCase() : '') + '">' + (r[3] || 'SIM') + '</td></tr>';
     }).join('');
     evEl.innerHTML = events[plant].map(function (e) {
       return '<li><span class="t">' + e.t + '</span><span' + (e.warn ? ' class="w"' : '') + '>' + e.txt + '</span></li>';
     }).join('') || '<li><span class="t">--</span><span>Sem eventos.</span></li>';
+  }
+  var NOME_SIM = { solar: 'UFV Exemplo · 35 MWp', eol: 'EOL Exemplo · 6 × 4,2 MW' };
+  function cabecalho() {
+    var R = REAL[plant];
+    document.getElementById('sc-name').textContent = R
+      ? R.usina + (R.estado ? ' (' + R.estado + ')' : '') + (R.capacidade_mw ? ' · ' + fmt(R.capacidade_mw, 0) + ' MW' : '')
+      : NOME_SIM[plant];
+    var modo = document.getElementById('sc-mode');
+    modo.textContent = R ? 'replay ONS' : 'simulação';
+    modo.className = 'sc-mode' + (R ? ' real' : '');
+    document.getElementById('sc-note').innerHTML = R ? notaReal(R) : NOTA_SIM;
+  }
+  var NOTA_SIM = '<b>Simulação ilustrativa no navegador.</b> Os valores seguem a física de cada fonte (irradiância e temperatura no solar; curva de potência, pitch e rotor no eólico), mas não são dados de nenhuma usina. No eólico, o botão "Simular ordem do ONS" limita o parque a cerca de metade da potência disponível.';
+  function notaReal(R) {
+    var solar = plant === 'solar';
+    return '<b>Replay de um dia real</b> (' + dataBR(R.data) + '): a potência total é a geração verificada publicada pelo ONS' +
+      (R.series_ons > 1 ? ' (soma de ' + R.series_ons + ' séries do complexo)' : '') + ', interpolada a cada 10 minutos' +
+      (R.clima ? '; ' + (solar ? 'irradiância e temperatura' : 'vento e direção a 100 m') + ' vêm do Open-Meteo para ' + fmt(R.lat, 2) + ', ' + fmt(R.lon, 2) : '') +
+      '. O ONS não publica dados por ' + (solar ? 'inversor' : 'aerogerador') + ', então os ' + (solar ? 'blocos' : 'grupos') + ', as tags internas e os eventos são estimados (qualidade EST; EXT = fonte externa; GOOD = medido). ' +
+      'Capacidade: ' + (R.capacidade_mw ? fmt(R.capacidade_mw, 0) + ' MW (' + R.capacidade_origem + ')' : 'não informada') + '.' +
+      (R.fixada === false ? ' A usina configurada não apareceu nos dados deste ciclo; o pipeline mostrou a maior do período.' : '') +
+      (solar ? '' : ' O botão "Simular ordem do ONS" continua sendo uma simulação sobre o dado real.');
+  }
+  function usarReal(p, R) {
+    if (!R || !R.horario || !R.horario.length) return;
+    var pk = R.horario.reduce(function (a, b) { return b[1] > a[1] ? b : a; });
+    R.pico = pk[1]; R.pico_h = pk[0];
+    REAL[p] = R;
+    var n = 8;
+    if (p === 'solar') {
+      S.inv = []; for (var k = 0; k < n; k++) S.inv.push({ id: 'BL-0' + (k + 1), eff: 0.97 + 0.03 * ((k * 37) % 10) / 10, T: 30, hot: false, p: 0 });
+    } else {
+      E.wtg = []; for (var m = 0; m < n; m++) E.wtg.push({ id: 'GR-0' + (m + 1), off: ((m * 53) % 9 - 4) * 0.06, v: 0, p: 0, rpm: 0, pitch: 0, rated: false, man: false });
+      E.limite = null; coffBtn.setAttribute('aria-pressed', 'false'); coffBtn.textContent = 'Simular ordem do ONS';
+    }
+    events[p] = [];
+    rt = 10; // começa às 10h, com as duas usinas gerando S.e = 0; E.e = 0; S.frAnt = undefined;
+    // acumula a energia de 00:00 até o início do replay
+    for (var h = PASSO_H; h <= rt + 1e-9; h += PASSO_H) {
+      if (REAL.solar) S.e += Math.max(0, interp(REAL.solar.horario, h) || 0) * PASSO_H;
+      if (REAL.eol) E.e += Math.max(0, interp(REAL.eol.horario, h) || 0) * PASSO_H;
+    }
+    logEv(p, 'Leitura do dia ' + dataBR(R.data) + ' carregada: ' + R.usina + ' · ' + fmt(R.energia_mwh, 0) + ' MWh' +
+      (R.fator_capacidade_dia_pct ? ' · FC ' + fmt(R.fator_capacidade_dia_pct, 1) + '%' : ''));
+    sel = 0; step(); cabecalho(); render();
   }
   unitsEl.addEventListener('click', function (ev) {
     var b = ev.target.closest('.unit'); if (!b) return;
     sel = +b.dataset.i; render();
     var nb = unitsEl.querySelector('[data-i="' + sel + '"]'); if (nb) nb.focus();
   });
+  var coffBtn = document.getElementById('sc-coff');
   document.querySelectorAll('#scada-box .seg button').forEach(function (b) {
     b.addEventListener('click', function () {
       plant = b.dataset.p; sel = 0;
       document.querySelectorAll('#scada-box .seg button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-      document.getElementById('sc-name').textContent = plant === 'solar' ? 'UFV Exemplo · 35 MWp' : 'EOL Exemplo · 6 × 4,2 MW';
       coffBtn.hidden = plant !== 'eol';
-      render();
+      cabecalho(); render();
     });
   });
-  var coffBtn = document.getElementById('sc-coff');
   coffBtn.addEventListener('click', function () {
     var on = E.limite === null;
-    E.limite = on ? Math.max(3, Math.round(E.disp * 0.5)) : null;
+    E.limite = on ? Math.max(1, Math.round(E.disp * 0.5)) : null;
     coffBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     coffBtn.textContent = on ? 'Liberar restrição' : 'Simular ordem do ONS';
-    logEv('eol', on ? 'ONS: ordem de restrição, parque limitado a ' + E.limite + ' MW (razão elétrica)' : 'ONS: restrição encerrada, parque liberado', on);
-    step(); render();
+    logEv('eol', on ? 'ONS (simulado): ordem de restrição, parque limitado a ' + fmt(E.limite, 0) + ' MW' : 'ONS (simulado): restrição encerrada, parque liberado', on);
+    aplicarLimite(); render();
   });
   var pauseBtn = document.getElementById('sc-pause');
   function setRun(on) {
@@ -1030,7 +1207,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   logEv('eol', 'WTG-05 em manutenção programada (troca de rolamento do pitch)', true);
   logEv('eol', 'Comunicação com 6 aerogeradores OK');
   for (var w = 0; w < 4; w++) step();
-  render(); setRun(running);
+  cabecalho(); render(); setRun(running);
 
   // ---------- constrained-off: ilustrativo até o pipeline publicar data/ons.json ----------
   var coffCv = document.getElementById('coff-chart'), coffOut = document.getElementById('coff-readout');
@@ -1136,7 +1313,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       ch.sc = escala(Math.max.apply(null, ch.data.map(function (p) { return p[1]; })));
       document.getElementById('name-' + par[0]).textContent = o.usina + sufixo(o);
       document.getElementById('prev-' + par[0]).hidden = true;
+      document.querySelector('#tag-' + par[0]).previousElementSibling.previousElementSibling.textContent = 'verificado (ONS)';
       document.getElementById('tag-' + par[0]).textContent = 'dados reais ONS · ' + dataBR(o.data);
+      ch.cv.closest('figure').setAttribute('aria-label', 'Geração verificada de ' + o.usina + ' em ' + dataBR(o.data));
       setReadout(ch); drawChart(ch);
     });
     var r = d.restricao;
@@ -1152,8 +1331,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       document.getElementById('coff-tag').textContent = 'dados reais ONS · ' + dataBR(r.data);
       coffReadout(); drawCoff();
     }
+    if (d.scada) { usarReal('solar', d.scada.solar); usarReal('eol', d.scada.eolica); }
+    aplicarMmgd(d.mmgd);
     var nota = document.getElementById('ons-nota');
-    if (nota && d.atualizado_em) { nota.hidden = false; nota.textContent = 'Curvas com dados reais do ONS (licença CC-BY 4.0), atualizadas automaticamente pelo pipeline em ' + dataBR(d.atualizado_em.slice(0, 10)) + '.'; }
+    if (nota && d.atualizado_em) {
+      nota.hidden = false;
+      nota.textContent = 'Curvas com dados reais do ONS (licença CC-BY 4.0)' + (d.data ? ', as duas do mesmo dia (' + dataBR(d.data) + ')' : '') +
+        '. Atualizadas automaticamente pelo pipeline em ' + dataBR(d.atualizado_em.slice(0, 10)) + '.';
+    }
   }
   try {
     if (window.fetch && location.protocol !== 'file:') {
@@ -1164,12 +1349,87 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     }
   } catch (e) {}
 
+  // ---------- MMGD: geração distribuída estimada pelo ONS (data/ons.json → mmgd) ----------
+  var mmCv = document.getElementById('mmgd-chart'), mmData = null, mmSc = escala(10), mmHover = null, mmGeom = null;
+  function drawMmgd() {
+    if (!mmCv || !mmData) return;
+    var css = getComputedStyle(root), c = function (n) { return css.getPropertyValue(n).trim(); };
+    var w = mmCv.clientWidth, hgt = mmCv.clientHeight, dpr = window.devicePixelRatio || 1;
+    if (!w) return;
+    mmCv.width = w * dpr; mmCv.height = hgt * dpr;
+    var ctx = mmCv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, hgt);
+    var L = 46, R = 16, T = 8, B = 24, pw = w - L - R, ph = hgt - T - B, top = mmSc.top;
+    var X = function (h) { return L + pw * (h + 0.5) / 24; }, Y = function (v) { return T + ph * (1 - v / top); };
+    mmGeom = { L: L, pw: pw };
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.fillStyle = c('--muted'); ctx.strokeStyle = c('--line'); ctx.lineWidth = 1;
+    mmSc.ticks.forEach(function (v) {
+      ctx.beginPath(); ctx.moveTo(L, Y(v) + .5); ctx.lineTo(w - R, Y(v) + .5); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmt(v / 1000, v % 1000 ? 1 : 0), L - 6, Y(v));
+    });
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    [0, 6, 12, 18, 23].forEach(function (h) { ctx.fillText(h + 'h', X(h), hgt - B + 6); });
+    var d = mmData.horario, cor = c('--grid');
+    ctx.beginPath(); ctx.moveTo(X(d[0][0]), Y(0));
+    d.forEach(function (p) { ctx.lineTo(X(p[0]), Y(p[1])); });
+    ctx.lineTo(X(d[d.length - 1][0]), Y(0)); ctx.closePath();
+    ctx.globalAlpha = .18; ctx.fillStyle = cor; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.beginPath(); d.forEach(function (p, k) { k ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])); });
+    ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.stroke();
+    if (mmHover !== null) {
+      var p = d[mmHover];
+      ctx.strokeStyle = c('--muted'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(p[0]) + .5, T); ctx.lineTo(X(p[0]) + .5, T + ph); ctx.stroke();
+      ctx.fillStyle = cor; ctx.beginPath(); ctx.arc(X(p[0]), Y(p[1]), 4, 0, 7); ctx.fill();
+    }
+  }
+  function mmReadout() {
+    var out = document.getElementById('mmgd-readout');
+    if (!mmData) return;
+    if (mmHover === null) {
+      var e = mmData.horario.reduce(function (a, p) { return a + p[1]; }, 0);
+      out.textContent = 'Energia estimada no dia: ' + fmt(e / 1000, 1) + ' GWh · passe o mouse para ver cada hora.';
+      return;
+    }
+    var p = mmData.horario[mmHover];
+    out.textContent = dois(p[0]) + 'h · ' + fmt(p[1], 0) + ' MW estimados (média da hora)';
+  }
+  function mmMove(ev) {
+    if (!mmGeom || !mmData) return;
+    var r = mmCv.getBoundingClientRect(), x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    mmHover = clamp(Math.round((x - mmGeom.L) / mmGeom.pw * 24 - 0.5), 0, mmData.horario.length - 1);
+    drawMmgd(); mmReadout();
+  }
+  if (mmCv) {
+    mmCv.addEventListener('mousemove', mmMove);
+    mmCv.addEventListener('touchmove', mmMove, { passive: true });
+    mmCv.addEventListener('mouseleave', function () { mmHover = null; drawMmgd(); mmReadout(); });
+  }
+  function aplicarMmgd(m) {
+    var bloco = document.getElementById('mmgd');
+    if (!bloco || !m || !m.horario || !m.horario.length) return;
+    mmData = m; bloco.hidden = false;
+    mmSc = escala(Math.max.apply(null, m.horario.map(function (p) { return p[1]; })));
+    var noite = m.horario.filter(function (p) { return p[0] <= 4; }), pico = Math.max.apply(null, m.horario.map(function (p) { return p[1]; }));
+    var mNoite = noite.length ? noite.reduce(function (a, p) { return a + p[1]; }, 0) / noite.length : 0;
+    document.getElementById('mmgd-tag').textContent = 'estimativa ONS · ' + dataBR(m.data);
+    document.getElementById('mmgd-kpis').innerHTML =
+      kpi(fmt(pico / 1000, 1) + ' GW', 'pico estimado no dia') + kpi(fmt(mNoite / 1000, 1) + ' GW', 'média de 0h a 4h') +
+      kpi(fmt(m.total_30d_gwh, 0) + ' GWh', 'últimos 30 dias') + kpi(fmt(m.series, 0), 'séries agregadas no ONS');
+    var maxE = m.estados_30d_gwh.length ? m.estados_30d_gwh[0][1] : 1;
+    document.getElementById('mmgd-estados').innerHTML = m.estados_30d_gwh.map(function (e) {
+      return '<li><span class="uf">' + e[0] + '</span><span class="bar"><i style="width:' + (e[1] / maxE * 100).toFixed(0) + '%"></i></span><span class="num">' + fmt(e[1], 0) + ' GWh</span></li>';
+    }).join('');
+    mmReadout(); drawMmgd();
+  }
+
   // ---------- previsão solar (IA): ilustrativa até o pipeline publicar data/previsao_solar.json ----------
   var pvCv = document.getElementById('pv-chart'), pvOut = document.getElementById('pv-readout');
   var pvPts = [], pvHover = null, pvGeom = null, pvSc = escala(120);
   function pvKpis(nmae, ganho, eAmanha, horas) {
     document.getElementById('pv-kpis').innerHTML =
-      kpi(fmt(nmae, 1) + '%', 'erro médio (nMAE)') + kpi((ganho === null ? '–' : fmt(ganho, 0) + '%'), 'menos erro que a persistência') +
+      kpi(fmt(nmae, 1) + '%', 'erro médio (nMAE)') +
+      (ganho === null ? kpi('–', 'comparação com a persistência')
+        : ganho >= 0 ? kpi(fmt(ganho, 0) + '%', 'menos erro que a persistência')
+        : kpi(fmt(-ganho, 0) + '%', 'mais erro que a persistência')) +
       kpi(fmt(eAmanha, 0) + ' MWh', 'geração prevista amanhã') + kpi(fmt(horas, 0), 'horas de treino');
   }
   (function () { // 3 dias ilustrativos + amanhã
@@ -1272,9 +1532,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     pvPts = pts; pvHover = null;
     pvSc = escala(Math.max.apply(null, pts.map(function (p) { return Math.max(p.prev, p.real || 0); })));
     var m = d.metricas || {};
-    pvKpis(m.modelo ? m.modelo.nmae_pct : 0, m.ganho_sobre_persistencia_pct === undefined ? null : m.ganho_sobre_persistencia_pct,
-           d.amanha.energia_mwh, d.horas_treino || 0);
+    var ganho = m.ganho_sobre_persistencia_pct === undefined ? null : m.ganho_sobre_persistencia_pct;
+    pvKpis(m.modelo ? m.modelo.nmae_pct : 0, ganho, d.amanha.energia_mwh, d.horas_treino || 0);
+    var aviso = document.getElementById('pv-aviso');
+    aviso.hidden = !(ganho !== null && ganho < 0);
+    if (!aviso.hidden) aviso.textContent = 'Nos últimos ' + (d.dias_teste || 14) + ' dias, repetir a geração de ontem errou menos que o modelo. ' +
+      'Isso acontece em sequências de dias parecidos (céu limpo estável); o resultado fica publicado como veio, sem ajuste, porque é a métrica real do pipeline.';
     document.getElementById('pv-name').textContent = d.usina + (d.estado ? ' (' + d.estado + ')' : '');
+    if (d.ponto_clima) document.getElementById('pv-tag').title = 'Clima em ' + fmt(d.lat, 2) + ', ' + fmt(d.lon, 2) + ' (' + d.ponto_clima + ')';
     document.getElementById('pv-tag').textContent = 'dados reais ONS + Open-Meteo · previsão para ' + dataBR(d.amanha.data);
     pvReadout(); drawPv();
   }
@@ -1293,12 +1558,12 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     bronze: ['Camada Bronze', 'Bronze · Python + Parquet', 'pipeline/ingest_ons.py baixa os arquivos (Parquet antes de CSV), padroniza os nomes de coluna para um esquema único e grava tudo como texto, com o arquivo de origem e o horário de ingestão.'],
     silver: ['Camada Silver', 'Silver · dbt', 'Converte tipos com try_cast e aplica as regras: instante válido, usina identificada, geração numérica e não negativa, fonte conhecida e sem duplicatas. O que falha vai para a quarentena com o motivo.'],
     gold: ['Camada Gold', 'Gold · dbt', 'Cinco tabelas: participação das fontes na matriz, energia diária por usina, curva típica do dia por estado, fator de capacidade mensal e energia eólica restringida por mês.'],
-    json: ['Publicação', 'data/ons.json', 'pipeline/export_site.py escolhe a maior usina solar, o maior parque eólico e o parque mais restringido do último mês e grava as curvas que o site desenha.'],
+    json: ['Publicação', 'data/ons.json', 'pipeline/export_site.py grava as curvas do Complexo Solar São Gonçalo e do Complexo Eólico Lagoa dos Ventos no mesmo dia, o replay do SCADA com o clima do Open-Meteo, a MMGD estimada e o parque mais restringido do mês.'],
     meteo: ['Fonte', 'Open-Meteo', 'Irradiância global, direta e difusa, temperatura e nebulosidade dos últimos ~90 dias e a previsão de amanhã, sem chave de API.'],
     modelo: ['IA', 'Previsão de geração solar', 'pipeline/previsao_solar.py treina um gradient boosting (scikit-learn) com a geração real e o clima, avalia nos últimos 14 dias contra a persistência e prevê amanhã hora a hora.'],
     prevjson: ['Publicação', 'data/previsao_solar.json', 'Métricas de erro, os últimos 7 dias real × previsto e a previsão de amanhã, lidos pela seção de IA do site.'],
     site: ['Destino', 'Portfólio no GitHub Pages', 'Site estático: os gráficos leem os dois JSON e, se eles não existirem, mostram dados ilustrativos.'],
-    orch: ['Orquestração', 'GitHub Actions', 'Workflow agendado todo dia às 06:17: ingestão, dbt build com 32 testes, exportação, previsão e deploy. Se um teste falhar, o site não é atualizado.']
+    orch: ['Orquestração', 'GitHub Actions', 'Workflow agendado todo dia às 06:17: ingestão, dbt build com 21 testes, exportação, previsão e deploy. Se um teste falhar, o site não é atualizado.']
   };
   var nodes = document.querySelectorAll('.node');
   var logEl = document.getElementById('arch-log'), runBtn = document.getElementById('arch-run');
@@ -1318,7 +1583,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     ['ons', 'ONS: 3 conjuntos encontrados, últimos 3 meses'],
     ['bronze', 'Bronze: arquivos padronizados em Parquet'],
     ['silver', 'Silver: regras aplicadas, rejeitados na quarentena'],
-    ['gold', 'Gold: 5 tabelas · dbt build com 32 testes OK'],
+    ['gold', 'Gold: 5 tabelas · dbt build com 21 testes OK'],
     ['json', 'data/ons.json gravado'],
     ['meteo', 'Open-Meteo: clima dos últimos 90 dias e de amanhã'],
     ['modelo', 'Modelo treinado e avaliado nos últimos 14 dias'],

@@ -1,7 +1,8 @@
 """
 IA: previsão de geração solar hora a hora para o dia seguinte.
 
-1. Escolhe a usina solar com mais energia nos últimos 30 dias (dados ONS já tratados pelo dbt).
+1. Usa a usina solar fixa do portfólio (pipeline/usinas.py: Complexo Solar São Gonçalo, PI), a mesma do
+   painel SCADA. Se ela não estiver nos dados, cai na maior usina solar física dos últimos 30 dias.
 2. Busca o tempo da região no Open-Meteo (gratuito, sem chave): irradiância global, direta e difusa,
    temperatura e nebulosidade, dos últimos ~90 dias e da previsão para amanhã.
 3. Treina um HistGradientBoostingRegressor (scikit-learn) com geração real x clima.
@@ -9,8 +10,9 @@ IA: previsão de geração solar hora a hora para o dia seguinte.
    regressão linear só com irradiância.
 5. Retreina com todo o histórico, prevê amanhã e grava data/previsao_solar.json para o site.
 
-Coordenadas: o conjunto horário do ONS não traz latitude/longitude, então usa um ponto representativo
-das regiões solares do estado. Para uma usina específica, defina SOLAR_LAT e SOLAR_LON.
+Coordenadas: do conjunto "fator de capacidade" do ONS (que traz latitude e longitude) ou do cadastro em
+pipeline/usinas.py. Só na falta das duas usa um ponto representativo das regiões solares do estado.
+SOLAR_LAT e SOLAR_LON continuam valendo para forçar um ponto.
 """
 import datetime as dt
 import json
@@ -25,6 +27,8 @@ import pandas as pd
 import requests
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.linear_model import LinearRegression
+
+from usinas import capacidade_e_local, selecionar, serie
 
 RAIZ = Path(__file__).resolve().parent.parent
 SAIDA = RAIZ / "data" / "previsao_solar.json"
@@ -56,22 +60,17 @@ def agora():
 
 
 def escolher_usina(con):
-    r = con.execute("""
-        with ult as (select max(data) d from gold_geracao_diaria_usina where tipo_fonte = 'SOLAR')
-        select chave_usina, any_value(usina), any_value(estado), sum(energia_mwh) e
-        from gold_geracao_diaria_usina, ult
-        where tipo_fonte = 'SOLAR' and data > ult.d - interval 30 day
-        group by chave_usina order by e desc limit 1""").fetchone()
-    if not r:
-        falhar("Sem dados de usinas solares na Gold.")
-    return {"chave": r[0], "usina": r[1], "estado": (r[2] or "").upper()}
+    sel = selecionar(con, "SOLAR")
+    if not sel:
+        falhar("Sem dados de usinas solares na Silver.")
+    sel["estado"] = (sel["estado"] or "").upper()
+    return sel
 
 
-def geracao_horaria(con, chave):
-    df = con.execute("""select instante, sum(geracao_mw) mw from silver_geracao_usina
-                        where chave_usina = ? group by instante order by instante""", [chave]).df()
+def geracao_horaria(con, chaves):
+    df = pd.DataFrame(serie(con, chaves), columns=["instante", "mw"])
     df["instante"] = pd.to_datetime(df["instante"])
-    return df.set_index("instante")["mw"]
+    return df.set_index("instante")["mw"].astype(float)
 
 
 def obter_clima(lat, lon):
@@ -113,14 +112,19 @@ def metricas(real, prev, capacidade):
 def main():
     con = duckdb.connect(str(RAIZ / "ons.duckdb"), read_only=True)
     u = escolher_usina(con)
+    local = capacidade_e_local(con, "SOLAR", u)
     lat = float(os.getenv("SOLAR_LAT", "nan")); lon = float(os.getenv("SOLAR_LON", "nan"))
+    origem_ponto = "SOLAR_LAT/SOLAR_LON"
     if math.isnan(lat) or math.isnan(lon):
-        if u["estado"] not in PONTO_UF:
-            falhar(f"Sem coordenadas para o estado '{u['estado']}'. Defina SOLAR_LAT e SOLAR_LON.")
-        lat, lon = PONTO_UF[u["estado"]]
-    print(f"Usina: {u['usina']} ({u['estado']}) · ponto do clima: {lat}, {lon}")
+        if local["lat"] is not None and local["lon"] is not None:
+            lat, lon, origem_ponto = local["lat"], local["lon"], "localização da usina"
+        elif u["estado"] in PONTO_UF:
+            (lat, lon), origem_ponto = PONTO_UF[u["estado"]], "ponto representativo do estado"
+        else:
+            falhar(f"Sem coordenadas para a usina '{u['usina']}'. Defina SOLAR_LAT e SOLAR_LON.")
+    print(f"Usina: {u['usina']} ({u['estado']}) · clima em {lat}, {lon} ({origem_ponto})")
 
-    ger = geracao_horaria(con, u["chave"])
+    ger = geracao_horaria(con, u["chaves"])
     try:
         clima = obter_clima(lat, lon)
     except Exception as e:
@@ -170,7 +174,8 @@ def main():
 
     saida = {
         "atualizado_em": agora(),
-        "usina": u["usina"], "estado": u["estado"], "lat": lat, "lon": lon,
+        "usina": u["usina"], "estado": u["estado"], "fixada": u["fixada"], "lat": lat, "lon": lon,
+        "ponto_clima": origem_ponto,
         "capacidade_ref_mw": round(capacidade, 1),
         "modelo": "HistGradientBoostingRegressor (scikit-learn)",
         "variaveis": ["irradiância global, direta e difusa", "temperatura", "nebulosidade", "hora", "época do ano"],

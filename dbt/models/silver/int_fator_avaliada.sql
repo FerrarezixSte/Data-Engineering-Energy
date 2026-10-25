@@ -6,7 +6,7 @@ with tipada as (
                  try_strptime(instante, '%d/%m/%Y %H:%M:%S'),
                  try_strptime(instante, '%d/%m/%Y %H:%M'))                       as instante,
         nullif(trim(conjunto), '')                                               as conjunto,
-        coalesce(nullif(trim(ceg), ''), nullif(trim(conjunto), ''))             as chave_conjunto,
+        coalesce({{ id_valido('ceg') }}, nullif(trim(conjunto), ''))          as chave_conjunto,
         upper(nullif(trim(estado), ''))                                          as estado,
         case
             when strip_accents(upper(tipo_usina)) like '%FOTOV%'
@@ -48,7 +48,7 @@ avaliada as (
 select *,
     -- a numeração considera só as linhas válidas; desempate fixo para o resultado ser sempre o mesmo
     case when motivo_rejeicao is null
-         then row_number() over (partition by chave_conjunto, instante, (motivo_rejeicao is null)
+         then row_number() over (partition by chave_conjunto, conjunto, instante, (motivo_rejeicao is null)
                                    order by ingested_at desc, source_file desc, geracao_verificada_mw desc nulls last)
     end as ordem_duplicata
 from avaliada
