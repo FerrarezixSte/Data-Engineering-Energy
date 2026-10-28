@@ -389,6 +389,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
             <div class="scope-legend">
               <span style="--c: var(--copper)">medido (SCADA)</span>
               <span id="prev-eol" style="--c: var(--grid)">previsto (modelo)</span>
+              <span id="lim-eol" class="amb" style="--c: transparent" hidden>restrição ONS</span>
               <span id="tag-eol" style="--c: transparent">dados ilustrativos</span>
             </div>
             <p class="readout" id="readout-eol" aria-live="polite"></p>
@@ -853,10 +854,28 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText(fmt(v, 0), L - 6, Y(v));
     });
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    [0, 6, 12, 18, 24].forEach(function (h) { ctx.fillText(h + 'h', X(h), hgt - B + 6); });
+    var off = ch.off || 0;
+    if (ch.noite) { // faixa sombreada das 18h às 6h
+      ctx.globalAlpha = .07; ctx.fillStyle = c('--fg'); ctx.fillRect(X(18 - off), T, X(30 - off) - X(18 - off), ph); ctx.globalAlpha = 1;
+    }
+    [0, 6, 12, 18, 24].forEach(function (h) { ctx.fillText((off ? (h + off) % 24 : h) + 'h', X(h), hgt - B + 6); });
     if (ch.prev) {
       ctx.strokeStyle = c('--grid'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.6; ctx.beginPath();
       for (var k = 0; k <= 240; k++) { var hh = k / 10; k ? ctx.lineTo(X(hh), Y(ch.prev(hh))) : ctx.moveTo(X(hh), Y(ch.prev(hh))); }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    if (ch.lim) {
+      var lim = ch.lim, amb = c('--todo');
+      ctx.globalAlpha = .45; ctx.fillStyle = amb;
+      for (var a = 0; a < lim.length - 1; a++) { // faixa entre o que podia gerar e o que gerou, de hora em hora
+        if (!lim[a][4] && !lim[a + 1][4]) continue;
+        var x0 = X(lim[a][0]), x1 = X(Math.min(24, lim[a][0] + 1)), g = ch.data[a] ? ch.data[a][1] : lim[a][2];
+        var g1 = ch.data[a + 1] ? ch.data[a + 1][1] : g, r0 = lim[a][1], r1 = lim[a + 1] ? lim[a + 1][1] : r0;
+        ctx.beginPath(); ctx.moveTo(x0, Y(Math.max(r0, g))); ctx.lineTo(x1, Y(Math.max(r1, g1))); ctx.lineTo(x1, Y(g1)); ctx.lineTo(x0, Y(g)); ctx.closePath(); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = c('--grid'); ctx.setLineDash([5, 4]); ctx.lineWidth = 1.6; ctx.beginPath();
+      lim.forEach(function (p, k) { k ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1])); });
       ctx.stroke(); ctx.setLineDash([]);
     }
     var cu = c('--copper');
@@ -883,13 +902,26 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     var passo = ch.data.length > 1 ? ch.data[1][0] - ch.data[0][0] : 1;
     if (ch.hover === null) {
       var e = ch.data.reduce(function (a, p) { return a + p[1] * passo; }, 0);
-      ch.out.textContent = 'Energia no dia: ' + fmt(e, 0) + ' MWh · clique para abrir no SCADA';
+      ch.out.textContent = (ch.noite ? 'Energia em 24 h (12h às 12h): ' : 'Energia no dia: ') + fmt(e, 0) + ' MWh' +
+        (ch.limInfo && ch.limInfo.horas_com_restricao ? ' · ' + fmt(ch.limInfo.energia_restringida_mwh, 0) + ' MWh cortados pelo ONS em ' + ch.limInfo.horas_com_restricao + ' h' +
+          (ch.limInfo.razoes.length ? ', ' + ch.limInfo.razoes.map(function (r) { return r.descricao; }).join(' e ') : '') : '') +
+        ' · clique para abrir no SCADA';
       return;
     }
     var p = ch.data[ch.hover];
-    if (!ch.prev) { ch.out.textContent = hhmm(p[0]) + ' · gerado ' + fmt(p[1], 1) + ' MW (média da hora)'; return; }
+    if (!ch.prev) {
+      var txt = (ch.noite ? diaHora(ch, p[0]) : hhmm(p[0])) + ' · gerado ' + fmt(p[1], 1) + ' MW';
+      var l = ch.lim && ch.lim.filter(function (x) { return x[0] === p[0]; })[0];
+      if (l) txt += ' · podia gerar ' + fmt(l[1], 1) + ' MW' + (l[4] ? ' · restrição ONS: ' + fmt(Math.max(0, l[1] - p[1]), 1) + ' MW cortados' : '');
+      else txt += ' (média da hora)';
+      ch.out.textContent = txt; return;
+    }
     var pv = ch.prev(p[0]), err = pv > 0.5 ? (p[1] - pv) / pv * 100 : null;
     ch.out.textContent = hhmm(p[0]) + ' · medido ' + fmt(p[1], 1) + ' MW · previsto ' + fmt(pv, 1) + ' MW' + (err === null ? '' : ' · desvio ' + (err > 0 ? '+' : '') + fmt(err, 0) + '%');
+  }
+  function diaHora(ch, h) { // hora relativa da janela → "24/10 23:00"
+    var t = new Date(ch.ini.getTime() + h * 36e5);
+    return dois(t.getDate()) + '/' + dois(t.getMonth() + 1) + ' ' + hhmm(t.getHours() + t.getMinutes() / 60);
   }
   function pontoMaisProximo(data, h) {
     var best = 0;
@@ -1310,11 +1342,22 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       if (!o || !ch || !o.horario || !o.horario.length) return;
       ch.data = o.horario.map(function (p) { return [p[0], Math.max(0, p[1])]; });
       ch.prev = null; ch.hover = null;
-      ch.sc = escala(Math.max.apply(null, ch.data.map(function (p) { return p[1]; })));
+      ch.noite = o.janela === 'noturna' && !!o.inicio; ch.off = ch.noite ? (o.offset_h || 12) : 0;
+      if (ch.noite) ch.ini = lerHora(o.inicio);
+      ch.lim = o.restricao && o.restricao.horario && o.restricao.horario.length ? o.restricao.horario : null;
+      ch.limInfo = ch.lim ? o.restricao : null;
+      if (par[0] === 'eol') {
+        document.getElementById('lim-eol').hidden = !(ch.lim && o.restricao.horas_com_restricao > 0);
+        if (ch.lim) document.getElementById('prev-eol').textContent = 'podia gerar (referência ONS)';
+      }
+      ch.sc = escala(Math.max.apply(null, ch.data.map(function (p) { return p[1]; }).concat(ch.lim ? ch.lim.map(function (p) { return p[1]; }) : [])));
       document.getElementById('name-' + par[0]).textContent = o.usina + sufixo(o);
-      document.getElementById('prev-' + par[0]).hidden = true;
-      document.querySelector('#tag-' + par[0]).previousElementSibling.previousElementSibling.textContent = 'verificado (ONS)';
-      document.getElementById('tag-' + par[0]).textContent = 'dados reais ONS · ' + dataBR(o.data);
+      document.getElementById('prev-' + par[0]).hidden = !ch.lim;
+      document.querySelector('#tag-' + par[0]).parentNode.firstElementChild.textContent = 'verificado (ONS)';
+      var ini = ch.noite ? dataBR(o.inicio.slice(0, 10)).slice(0, 5) : '';
+      document.getElementById('tag-' + par[0]).textContent = ch.noite
+        ? 'dados reais ONS · noite de ' + ini + ' para ' + dataBR(o.data).slice(0, 5)
+        : 'dados reais ONS · ' + dataBR(o.data);
       ch.cv.closest('figure').setAttribute('aria-label', 'Geração verificada de ' + o.usina + ' em ' + dataBR(o.data));
       setReadout(ch); drawChart(ch);
     });
@@ -1336,7 +1379,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     var nota = document.getElementById('ons-nota');
     if (nota && d.atualizado_em) {
       nota.hidden = false;
-      nota.textContent = 'Curvas com dados reais do ONS (licença CC-BY 4.0)' + (d.data ? ', as duas do mesmo dia (' + dataBR(d.data) + ')' : '') +
+      var noturna = d.eolica && d.eolica.janela === 'noturna';
+      nota.textContent = 'Curvas com dados reais do ONS (licença CC-BY 4.0)' +
+        (d.data ? (noturna ? ': a solar no dia ' + dataBR(d.data) + ' e a eólica ' +
+          (d.eolica.mesmo_dia_solar === false ? 'na noite mais recente que já tem a restrição publicada pelo ONS' : 'na noite em volta dele') +
+          ', com a madrugada no centro (faixa sombreada das 18h às 6h), quando o vento do Nordeste sopra mais' +
+          (d.eolica.restricao ? '. Em amarelo, a energia que o parque deixou de gerar por ordem do ONS (referência menos verificada)' : '')
+                           : ', as duas do mesmo dia (' + dataBR(d.data) + ')') : '') +
         '. Atualizadas automaticamente pelo pipeline em ' + dataBR(d.atualizado_em.slice(0, 10)) + '.';
     }
   }

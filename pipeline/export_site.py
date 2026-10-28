@@ -2,7 +2,8 @@
 Gera data/ons.json para os gráficos do portfólio, a partir das tabelas Silver/Gold do DuckDB.
 
 - solar / eolica: as usinas fixas do portfólio (pipeline/usinas.py) no dia mais recente em que as duas têm
-  as 24 horas completas, para as curvas do topo serem do mesmo dia.
+  as 24 horas completas. A solar mostra o dia (0h-24h); a eólica mostra a janela noturna (12h-12h) em volta
+  desse dia, porque é à noite que o vento do Nordeste gera mais.
 - scada: as mesmas usinas, com capacidade, localização e o tempo da região naquele dia (Open-Meteo),
   para o painel SCADA reproduzir o dia real hora a hora.
 - mmgd: a micro e minigeração distribuída estimada pelo ONS, mostrada à parte porque não é uma usina física.
@@ -60,6 +61,71 @@ def clima_do_dia(lat, lon, dia):
     except Exception as e:
         print("AVISO: clima do Open-Meteo indisponível:", e)
         return None
+
+
+def janela_noturna(pontos, dia, inicio_h=12):
+    """24 horas de meio-dia a meio-dia, com a noite no centro (a eólica do Nordeste gera mais à noite).
+    Prefere a noite que começa no dia escolhido; se a manhã seguinte ainda não foi publicada, usa a noite anterior.
+    Devolve (início, [[hora relativa 0-23, MW]]) ou (None, None)."""
+    por_hora = {}
+    for t, mw in pontos:
+        por_hora[t] = por_hora.get(t, 0.0) + float(mw)
+    for ini_dia in (dia, dia - dt.timedelta(days=1)):
+        ini = dt.datetime.combine(ini_dia, dt.time(inicio_h))
+        horas = [ini + dt.timedelta(hours=k) for k in range(24)]
+        if all(h in por_hora for h in horas):
+            return ini, [[k, round(max(0.0, por_hora[h]), 2)] for k, h in enumerate(horas)]
+    return None, None
+
+
+RAZOES = {  # códigos de razão da restrição no ONS
+    "ENE": "razão energética",          # sobra de energia no sistema
+    "REL": "razão elétrica",            # limite da rede de transmissão
+    "CNF": "confiabilidade elétrica",
+    "PAR": "indisponibilidade externa",
+}
+
+
+def restricao_da_usina(sel, ini):
+    """Restrição de operação do ONS na janela de 24 h a partir de `ini`, somando as séries do complexo.
+    Devolve [[hora relativa, referência MW, verificada MW, restringida MW, com_restricao]] e as razões,
+    ou (None, None) se o ONS ainda não publicou ao menos 20 das 24 horas."""
+    padrao = sel["padrao"] or sel["usina"].upper()
+    rows = con.execute("""
+        select date_trunc('hour', instante) h,
+               sum(coalesce(referencia_mw, geracao_mw) * horas_intervalo) ref_mw,
+               sum(geracao_mw * horas_intervalo) ger_mw,
+               sum(restringido_mw * horas_intervalo) restr_mw,
+               bool_or(com_restricao) com_lim,
+               string_agg(distinct razao_restricao, ',') razoes
+        from silver_restricao_eolica
+        where strip_accents(upper(coalesce(usina, ''))) like ? and instante >= ? and instante < ?
+        group by 1 order by 1""", [f"%{padrao}%", ini, ini + dt.timedelta(days=1)]).fetchall()
+    if len(rows) < 20:
+        return None, None
+    razoes = sorted({r for row in rows if row[5] for r in row[5].split(",")})
+    pts = [[int((h - ini).total_seconds() // 3600), round(float(ref or 0), 2), round(float(ger or 0), 2),
+            round(float(restr or 0), 2), bool(lim)] for h, ref, ger, restr, lim, _ in rows]
+    return pts, [{"codigo": r, "descricao": RAZOES.get(r.upper(), r)} for r in razoes]
+
+
+def noite_com_restricao(sel, pontos, dia):
+    """Escolhe a janela noturna da eólica: a do dia do gráfico solar se o ONS já publicou a restrição dela;
+    senão a noite mais recente (até 21 dias) com geração e restrição completas; senão a do dia, sem restrição."""
+    ini, noite = janela_noturna(pontos, dia)
+    if not noite:
+        return None, None, None, None
+    restr, razoes = restricao_da_usina(sel, ini)
+    if restr:
+        return ini, noite, restr, razoes
+    for k in range(1, 22):
+        ini2, noite2 = janela_noturna(pontos, dia - dt.timedelta(days=k))
+        if not noite2 or ini2 >= ini:
+            continue
+        restr2, razoes2 = restricao_da_usina(sel, ini2)
+        if restr2:
+            return ini2, noite2, restr2, razoes2
+    return ini, noite, None, None
 
 
 def resumo(sel, curva):
@@ -152,13 +218,31 @@ sol, ps, eol, pe, dia = usinas_e_dia()
 curva_s = do_dia(ps, dia) if dia else []
 curva_e = do_dia(pe, dia) if dia else []
 
+# curva eólica do topo: janela noturna (12h → 12h); se não houver 24 h seguidas, volta ao dia corrido
+eolica_topo = None
+if eol and curva_e:
+    ini, noite, restr, razoes = noite_com_restricao(eol, pe, dia)
+    if noite:
+        fim = ini + dt.timedelta(days=1)
+        eolica_topo = {**resumo(eol, noite), "data": str(fim.date()), "janela": "noturna",
+                       "inicio": ini.strftime("%Y-%m-%dT%H:00"), "offset_h": ini.hour,
+                       "mesmo_dia_solar": fim.date() == dia or ini.date() == dia}
+        if restr:
+            eolica_topo["restricao"] = {
+                "horario": restr, "razoes": razoes,
+                "energia_restringida_mwh": round(sum(p[3] for p in restr), 1),
+                "horas_com_restricao": sum(1 for p in restr if p[4]),
+            }
+    else:
+        eolica_topo = {**resumo(eol, curva_e), "data": str(dia), "janela": "dia"}
+
 saida = {
     "atualizado_em": dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes"),
     "fonte": "ONS - Dados Abertos (CC-BY 4.0): Geração por usina em base horária; Restrição de operação de eólicas. "
              "Clima: Open-Meteo (CC-BY 4.0).",
     "data": str(dia) if dia else None,
     "solar": ({**resumo(sol, curva_s), "data": str(dia)} if sol and curva_s else None),
-    "eolica": ({**resumo(eol, curva_e), "data": str(dia)} if eol and curva_e else None),
+    "eolica": eolica_topo,
     "scada": {"solar": scada("SOLAR", sol, curva_s, dia), "eolica": scada("EOLICA", eol, curva_e, dia)},
     "mmgd": mmgd(dia),
     "restricao": restricao(),
@@ -170,4 +254,10 @@ destino.write_text(json.dumps(saida, ensure_ascii=False, separators=(",", ":")),
 print(f"Gravado {destino} ({destino.stat().st_size / 1024:.1f} KB) · dia {saida['data']}")
 for k in ("solar", "eolica", "restricao", "mmgd"):
     v = saida[k]
+    if k == "eolica" and v and v.get("restricao"):
+        r = v["restricao"]
+        print(f"  eolica: restrição ONS em {r['horas_com_restricao']} h, {r['energia_restringida_mwh']} MWh "
+              f"({', '.join(x['codigo'] for x in r['razoes']) or 'sem código'})")
+    elif k == "eolica" and v:
+        print("  eolica: restrição do ONS ainda não publicada para as últimas noites")
     print(f"  {k}: {v.get('usina', 'MMGD')} ({v.get('estado', 'BR')}) em {v['data']}" if v else f"  {k}: sem dados")

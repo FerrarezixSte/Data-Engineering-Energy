@@ -6,7 +6,7 @@ with tipada as (
                  try_strptime(instante, '%d/%m/%Y %H:%M:%S'),
                  try_strptime(instante, '%d/%m/%Y %H:%M'))                       as instante,
         nullif(trim(usina), '')                                                  as usina,
-        coalesce(nullif(trim(ceg), ''), nullif(trim(id_ons), ''), nullif(trim(usina), '')) as chave_usina,
+        coalesce({{ id_valido('ceg') }}, {{ id_valido('id_ons') }}, nullif(trim(usina), '')) as chave_usina,
         upper(nullif(trim(estado), ''))                                          as estado,
         try_cast(replace(trim(geracao), ',', '.') as double)                     as geracao_mw,
         try_cast(replace(trim(referencia), ',', '.') as double)                  as referencia_mw,
@@ -29,7 +29,7 @@ avaliada as (
 select *,
     -- a numeração considera só as linhas válidas; desempate fixo para o resultado ser sempre o mesmo
     case when motivo_rejeicao is null
-         then row_number() over (partition by chave_usina, instante, (motivo_rejeicao is null)
+         then row_number() over (partition by chave_usina, usina, instante, (motivo_rejeicao is null)
                                    order by ingested_at desc, source_file desc, geracao_mw desc nulls last)
     end as ordem_duplicata
 from avaliada
