@@ -607,14 +607,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
             <span style="--c: var(--copper)">real (ONS)</span>
             <span style="--c: var(--grid)">previsto pelo modelo</span>
             <span class="amb" style="--c: transparent">previsão para amanhã</span>
+            <span class="amb lim" id="pv-lim" style="--c: transparent" hidden>corte do ONS / limitação</span>
           </div>
           <p class="readout" id="pv-readout" aria-live="polite"></p>
           <p class="pv-aviso mono" id="pv-aviso" hidden></p>
+          <p class="mono muted" id="pv-expl" style="font-size:.72rem;margin-top:10px" hidden></p>
         </figure>
         <div class="lessons" aria-label="Como funciona a previsão">
           <div class="lesson"><span class="p">Dados</span><p>Geração horária real da usina, do ONS, e o tempo da região, do Open-Meteo: irradiância global, direta e difusa, temperatura e nebulosidade.</p></div>
-          <div class="lesson"><span class="p">Modelo</span><p>Gradient boosting (scikit-learn) com hora do dia e época do ano. Treina com cerca de 90 dias e é avaliado nos últimos 14, que ficam fora do treino.</p></div>
+          <div class="lesson"><span class="p">Modelo</span><p>Gradient boosting (scikit-learn) com hora do dia e posição do sol calculada para a usina. Treina com cerca de 90 dias e é avaliado nos últimos 14, que ficam fora do treino.</p></div>
           <div class="lesson"><span class="p">Comparação</span><p>O erro é comparado com a persistência (repetir a geração de ontem). O ganho mostra quanto o modelo erra menos que a regra mais simples.</p></div>
+          <div class="lesson"><span class="p">Cortes do ONS</span><p>Quando o ONS manda a usina reduzir, a geração deixa de seguir o sol. O modelo aprende com o que a usina podia gerar (a referência do ONS) e as horas cortadas ficam fora da avaliação. Sem a referência, patamares de 3 h ou mais com o sol variando e quedas para menos da metade do esperado também ficam de fora.</p></div>
           <div class="lesson"><span class="p">Uso no setor</span><p>Previsão de geração entra na programação da operação, na comercialização de energia e no planejamento de manutenção nos dias de menor produção.</p></div>
         </div>
       </div>
@@ -1473,13 +1476,15 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   // ---------- previsão solar (IA): ilustrativa até o pipeline publicar data/previsao_solar.json ----------
   var pvCv = document.getElementById('pv-chart'), pvOut = document.getElementById('pv-readout');
   var pvPts = [], pvHover = null, pvGeom = null, pvSc = escala(120);
-  function pvKpis(nmae, ganho, eAmanha, horas) {
+  function pvKpis(nmae, ganho, eAmanha, horas, diaSeg) {
     document.getElementById('pv-kpis').innerHTML =
-      kpi(fmt(nmae, 1) + '%', 'erro médio (nMAE)') +
+      kpi(fmt(nmae, 1) + '%', 'erro médio (nMAE) sem cortes') +
       (ganho === null ? kpi('–', 'comparação com a persistência')
         : ganho >= 0 ? kpi(fmt(ganho, 0) + '%', 'menos erro que a persistência')
         : kpi(fmt(-ganho, 0) + '%', 'mais erro que a persistência')) +
-      kpi(fmt(eAmanha, 0) + ' MWh', 'geração prevista amanhã') + kpi(fmt(horas, 0), 'horas de treino');
+      kpi(fmt(eAmanha, 0) + ' MWh', 'geração prevista amanhã') +
+      (diaSeg ? kpi(fmt(diaSeg.nmae_pct, 1) + '%', 'erro real do dia seguinte · ' + diaSeg.dias + ' dias')
+              : kpi(fmt(horas, 0), 'horas de treino'));
   }
   (function () { // 3 dias ilustrativos + amanhã
     var nuv = [0.15, 0.55, 0.1, 0.3], hoje = new Date(); hoje.setHours(0, 0, 0, 0);
@@ -1523,6 +1528,21 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       ctx.globalAlpha = .08; ctx.fillStyle = c('--todo'); ctx.fillRect(X(iFut), T, X(n - 1) - X(iFut), ph); ctx.globalAlpha = 1;
       ctx.strokeStyle = c('--todo'); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(X(iFut) + .5, T); ctx.lineTo(X(iFut) + .5, T + ph); ctx.stroke(); ctx.setLineDash([]);
     }
+    // cortes: área entre o que a usina podia gerar (referência ONS) e o que gerou; patamar suspeito = faixa no rodapé
+    var amb = c('--todo');
+    for (var q = 0; q < n - 1; q++) {
+      var p0 = pvPts[q], p1 = pvPts[q + 1];
+      if (p0.real === null || p1.real === null) continue;
+      if (p0.corte === 'ons' || p1.corte === 'ons') {
+        var r0 = p0.ref !== null ? p0.ref : p0.real, r1 = p1.ref !== null ? p1.ref : p1.real;
+        ctx.globalAlpha = .45; ctx.fillStyle = amb; ctx.beginPath();
+        ctx.moveTo(X(q), Y(Math.max(r0, p0.real))); ctx.lineTo(X(q + 1), Y(Math.max(r1, p1.real)));
+        ctx.lineTo(X(q + 1), Y(p1.real)); ctx.lineTo(X(q), Y(p0.real)); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+      }
+      if ((p0.corte === 'patamar' || p0.corte === 'queda') && (p1.corte === 'patamar' || p1.corte === 'queda')) {
+        ctx.globalAlpha = .55; ctx.fillStyle = amb; ctx.fillRect(X(q), T + ph - 5, X(q + 1) - X(q), 5); ctx.globalAlpha = 1;
+      }
+    }
     // real
     var cu = c('--copper');
     ctx.strokeStyle = cu; ctx.lineWidth = 2; ctx.beginPath(); var on = false;
@@ -1553,7 +1573,11 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     var p = pvPts[pvHover], quando = (p.fut ? 'amanhã ' : dois(p.t.getDate()) + '/' + dois(p.t.getMonth() + 1) + ' ') + dois(p.t.getHours()) + 'h';
     pvOut.textContent = p.fut
       ? quando + ' · previsto ' + fmt(p.prev, 1) + ' MW' + (p.ghi !== undefined ? ' · irradiância prevista ' + fmt(p.ghi, 0) + ' W/m²' : '')
-      : quando + ' · real ' + fmt(p.real, 1) + ' MW · previsto ' + fmt(p.prev, 1) + ' MW · erro ' + fmt(p.prev - p.real, 1) + ' MW';
+      : quando + ' · real ' + fmt(p.real, 1) + ' MW · previsto ' + fmt(p.prev, 1) + ' MW' +
+        (p.corte === 'ons' ? ' · corte do ONS: podia gerar ' + fmt(p.ref, 1) + ' MW (fora da avaliação)'
+          : p.corte === 'patamar' ? ' · patamar suspeito de limitação (fora da avaliação)'
+          : p.corte === 'queda' ? ' · queda que o tempo não explica, provável corte (fora da avaliação)'
+          : ' · erro ' + fmt(p.prev - p.real, 1) + ' MW');
   }
   function pvMove(ev) {
     if (!pvGeom) return;
@@ -1576,16 +1600,26 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     bt.forEach(function (p) { var dia = p[0].slice(0, 10); if (ultDias.indexOf(dia) < 0) ultDias.push(dia); });
     var manter = ultDias.slice(-3);
     var pts = bt.filter(function (p) { return manter.indexOf(p[0].slice(0, 10)) >= 0; })
-      .map(function (p) { return { t: lerHora(p[0]), real: Math.max(0, p[1]), prev: Math.max(0, p[2]), fut: false }; });
+      .map(function (p) { return { t: lerHora(p[0]), real: Math.max(0, p[1]), prev: Math.max(0, p[2]), fut: false,
+                                    ref: p[3] === undefined || p[3] === null ? null : p[3], corte: p[4] || null }; });
     d.amanha.horario.forEach(function (p) { pts.push({ t: lerHora(p[0]), real: null, prev: Math.max(0, p[1]), fut: true, ghi: p[2] }); });
     pvPts = pts; pvHover = null;
-    pvSc = escala(Math.max.apply(null, pts.map(function (p) { return Math.max(p.prev, p.real || 0); })));
+    pvSc = escala(Math.max.apply(null, pts.map(function (p) { return Math.max(p.prev, p.real || 0, p.ref || 0); })));
+    var temCorte = pts.some(function (p) { return p.corte; });
+    document.getElementById('pv-lim').hidden = !temCorte;
     var m = d.metricas || {};
     var ganho = m.ganho_sobre_persistencia_pct === undefined ? null : m.ganho_sobre_persistencia_pct;
-    pvKpis(m.modelo ? m.modelo.nmae_pct : 0, ganho, d.amanha.energia_mwh, d.horas_treino || 0);
+    pvKpis(m.modelo ? m.modelo.nmae_pct : 0, ganho, d.amanha.energia_mwh, d.horas_treino || 0, m.dia_seguinte_real);
+    var expl = document.getElementById('pv-expl');
+    if (expl && m.modelo_todas_horas) {
+      expl.hidden = false;
+      expl.textContent = 'Erro de ' + fmt(m.modelo.nmae_pct, 1) + '% nas horas sem corte e de ' + fmt(m.modelo_todas_horas.nmae_pct, 1) +
+        '% em todas as horas, com o tempo observado. ' +
+        (m.dia_seguinte_real ? 'O erro real do dia seguinte (' + fmt(m.dia_seguinte_real.nmae_pct, 1) + '%) compara o que o site publicou um dia antes, com o tempo ainda previsto, com o que a usina gerou, incluindo os cortes do ONS, que nenhum modelo de clima consegue prever.' : '');
+    }
     var aviso = document.getElementById('pv-aviso');
     aviso.hidden = !(ganho !== null && ganho < 0);
-    if (!aviso.hidden) aviso.textContent = 'Nos últimos ' + (d.dias_teste || 14) + ' dias, repetir a geração de ontem errou menos que o modelo. ' +
+    if (!aviso.hidden) aviso.textContent = 'Nos últimos ' + (d.dias_teste || 14) + ' dias, repetir a geração de ontem errou menos que o modelo nas horas sem corte. ' +
       'Isso acontece quando o tempo muda pouco de um dia para o outro; o resultado fica publicado como veio, sem ajuste, porque é a métrica real do pipeline.';
     document.getElementById('pv-name').textContent = d.usina + (d.estado ? ' (' + d.estado + ')' : '');
     if (d.ponto_clima) document.getElementById('pv-tag').title = 'Clima em ' + fmt(d.lat, 2) + ', ' + fmt(d.lon, 2) + ' (' + d.ponto_clima + ')';

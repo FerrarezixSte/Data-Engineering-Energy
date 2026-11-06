@@ -73,6 +73,23 @@ CONJUNTOS = {
             "razao": ["cod_razaorestricao", "dsc_restricao"],
         },
     },
+    "restricao_solar": {
+        # mesmo layout da eólica: geração verificada, referência (o que a usina podia gerar) e razão do corte.
+        # As pastas são testadas nesta ordem e fica a primeira cujos arquivos têm as colunas obrigatórias.
+        "palavras": ["restricao_coff", "fotovolt"], "preferir": ["fotovoltaica_tm", "usi"], "evitar": ["intrasemihora", "detail"],
+        "obrigatorias": ["instante", "usina", "geracao", "referencia"],
+        "campos": {
+            "instante": ["din_instante"],
+            "usina": ["nom_usina", "nom_conjuntousina"],
+            "ceg": ["ceg"],
+            "id_ons": ["id_ons"],
+            "estado": ["id_estado", "nom_estado"],
+            "geracao": ["val_geracao", "val_geracaoverificada"],
+            "referencia": ["val_geracaoreferenciafinal", "val_geracaoreferencia", "val_geracaoestimada", "val_disponibilidade"],
+            "limitada": ["val_geracaolimitada"],
+            "razao": ["cod_razaorestricao", "dsc_restricao"],
+        },
+    },
 }
 
 

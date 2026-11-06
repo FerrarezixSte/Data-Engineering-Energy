@@ -53,11 +53,17 @@ def clima_do_dia(lat, lon, dia):
         r = requests.get("https://api.open-meteo.com/v1/forecast", timeout=60, params={
             "latitude": lat, "longitude": lon, "timezone": FUSO,
             "hourly": "shortwave_radiation,temperature_2m,wind_speed_100m,wind_direction_100m",
-            "wind_speed_unit": "ms", "start_date": str(dia), "end_date": str(dia)})
+            "wind_speed_unit": "ms", "start_date": str(dia), "end_date": str(dia + dt.timedelta(days=1))})
         r.raise_for_status()
         h = r.json()["hourly"]
-        return [[int(t[11:13]), g, temp, v, d] for t, g, temp, v, d in zip(
-            h["time"], h["shortwave_radiation"], h["temperature_2m"], h["wind_speed_100m"], h["wind_direction_100m"])]
+        # Open-Meteo: radiação das "07:00" = média de 06:00-07:00; ONS: "06:00" = 06:00-07:00. Desloca 1 h.
+        saida = []
+        for t, g, temp, v, d in zip(h["time"], h["shortwave_radiation"], h["temperature_2m"],
+                                    h["wind_speed_100m"], h["wind_direction_100m"]):
+            ini = dt.datetime.fromisoformat(t) - dt.timedelta(hours=1)
+            if ini.date() == dia:
+                saida.append([ini.hour, g, temp, v, d])
+        return saida
     except Exception as e:
         print("AVISO: clima do Open-Meteo indisponível:", e)
         return None

@@ -14,6 +14,13 @@ models:
         tests:
           - accepted_values:
               values: ["SOLAR", "EOLICA", "HIDRAULICA", "NUCLEAR", "TERMICA"]
+  - name: silver_restricao_solar
+    description: "Restrição de operação (constrained-off) de usinas solares, validada. Usada para treinar a previsão com a geração disponível."
+    columns:
+      - name: instante
+        tests: [not_null]
+      - name: restringido_mw
+        tests: [not_null]
   - name: silver_restricao_eolica
     description: "Restrição de operação (constrained-off) de eólicas, validada."
     columns:
