@@ -489,7 +489,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
             <p class="muted">Todo dia o GitHub Actions baixa os dados abertos do ONS (geração horária por usina, fator de capacidade e restrição de operação de eólicas), o DuckDB processa e o dbt monta as camadas Silver e Gold com regras de qualidade, quarentena e testes. O resultado é publicado neste site: as curvas reais do topo, o gráfico de restrição e a previsão solar vêm dele.</p>
             <div class="metrics">
               <div class="metric"><b>1×/dia</b><span>atualização automática</span></div>
-              <div class="metric"><b>21</b><span>testes dbt por execução</span></div>
+              <div class="metric"><b>23</b><span>testes dbt por execução</span></div>
               <div class="metric"><b>5</b><span>tabelas Gold</span></div>
               <div class="metric"><b>R$ 0</b><span>custo de infraestrutura</span></div>
             </div>
@@ -661,7 +661,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
             <g class="node" data-k="meteo" tabindex="0" role="button" aria-label="Open-Meteo"><rect class="d-box" x="20" y="280" width="140" height="80" rx="6"/><text class="d-l" x="34" y="304">FONTE</text><text class="d-t" x="34" y="328">Open-Meteo</text><text class="d-s" x="34" y="348">clima</text></g>
             <g class="node" data-k="modelo" tabindex="0" role="button" aria-label="Modelo de previsão"><rect class="d-box" x="355" y="280" width="140" height="80" rx="6"/><text class="d-l" x="369" y="304">IA</text><text class="d-t" x="369" y="328">Previsão solar</text><text class="d-s" x="369" y="348">scikit-learn</text></g>
             <g class="node" data-k="prevjson" tabindex="0" role="button" aria-label="previsao_solar.json"><rect class="d-box" x="670" y="280" width="130" height="80" rx="6"/><text class="d-t" x="684" y="310">previsao_</text><text class="d-t" x="684" y="328">solar.json</text></g>
-            <g class="node" data-k="orch" tabindex="0" role="button" aria-label="Orquestração"><rect class="d-orch" x="190" y="400" width="610" height="56" rx="6"/><text class="d-g" x="206" y="422">GITHUB ACTIONS · TODO DIA ÀS 06:17</text><text class="d-s" x="206" y="443">ingestão → dbt build (21 testes) → export → previsão → deploy</text></g>
+            <g class="node" data-k="orch" tabindex="0" role="button" aria-label="Orquestração"><rect class="d-orch" x="190" y="400" width="610" height="56" rx="6"/><text class="d-g" x="206" y="422">GITHUB ACTIONS · TODO DIA ÀS 06:17</text><text class="d-s" x="206" y="443">ingestão → dbt build (23 testes) → export → previsão → deploy</text></g>
           </svg>
         </div>
         <div class="arch-bar">
@@ -709,7 +709,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
         <div class="lessons" aria-label="Decisões técnicas">
           <div class="lesson"><span class="p">Custo zero</span><p>GitHub Actions agenda e roda tudo; DuckDB processa os arquivos sem servidor de banco; o site é estático no GitHub Pages.</p></div>
-          <div class="lesson"><span class="p">Teste que falha não publica</span><p>O dbt build roda 21 testes, entre eles Bronze = Silver + quarentena e energia da Gold = Silver. Se algum falhar, os dados do site não são atualizados.</p></div>
+          <div class="lesson"><span class="p">Teste que falha não publica</span><p>O dbt build roda 23 testes, entre eles Bronze = Silver + quarentena e energia da Gold = Silver. Se algum falhar, os dados do site não são atualizados.</p></div>
           <div class="lesson"><span class="p">Fonte muda, pipeline não quebra</span><p>A ingestão descobre sozinha a pasta de cada conjunto no ONS e mapeia nomes de coluna alternativos para um esquema padrão.</p></div>
         </div>
       </div>
@@ -1646,7 +1646,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     modelo: ['IA', 'Previsão de geração solar', 'pipeline/previsao_solar.py treina um gradient boosting (scikit-learn) com a geração real e o clima, avalia nos últimos 14 dias contra a persistência e prevê amanhã hora a hora.'],
     prevjson: ['Publicação', 'data/previsao_solar.json', 'Métricas de erro, os últimos 7 dias real × previsto e a previsão de amanhã, lidos pela seção de IA do site.'],
     site: ['Destino', 'Portfólio no GitHub Pages', 'Site estático: os gráficos leem os dois JSON e, se eles não existirem, mostram dados ilustrativos.'],
-    orch: ['Orquestração', 'GitHub Actions', 'Workflow agendado todo dia às 06:17: ingestão, dbt build com 21 testes, exportação, previsão e deploy. Se um teste falhar, o site não é atualizado.']
+    orch: ['Orquestração', 'GitHub Actions', 'Workflow agendado todo dia às 06:17: ingestão, dbt build com 23 testes, exportação, previsão e deploy. Se um teste falhar, o site não é atualizado.']
   };
   var nodes = document.querySelectorAll('.node');
   var logEl = document.getElementById('arch-log'), runBtn = document.getElementById('arch-run');
@@ -1666,7 +1666,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     ['ons', 'ONS: 3 conjuntos encontrados, últimos 3 meses'],
     ['bronze', 'Bronze: arquivos padronizados em Parquet'],
     ['silver', 'Silver: regras aplicadas, rejeitados na quarentena'],
-    ['gold', 'Gold: 5 tabelas · dbt build com 21 testes OK'],
+    ['gold', 'Gold: 5 tabelas · dbt build com 23 testes OK'],
     ['json', 'data/ons.json gravado'],
     ['meteo', 'Open-Meteo: clima dos últimos 90 dias e de amanhã'],
     ['modelo', 'Modelo treinado e avaliado nos últimos 14 dias'],
